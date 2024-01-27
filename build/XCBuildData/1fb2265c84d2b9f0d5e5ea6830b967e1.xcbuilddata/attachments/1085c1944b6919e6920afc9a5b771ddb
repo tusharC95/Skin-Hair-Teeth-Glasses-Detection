@@ -1,0 +1,5 @@
+ extern const unsigned char Pods_SSMUtilityVersionString[];
+ extern const double Pods_SSMUtilityVersionNumber;
+
+ const unsigned char Pods_SSMUtilityVersionString[] __attribute__ ((used)) = "@(#)PROGRAM:Pods_SSMUtility  PROJECT:Pods-1" "\n";
+ const double Pods_SSMUtilityVersionNumber __attribute__ ((used)) = (double)1.;

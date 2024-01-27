@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="o6o-2W-7TW">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Camera View Controller-->
+        <scene sceneID="olt-We-Nwx">
+            <objects>
+                <viewController id="o6o-2W-7TW" userLabel="Camera View Controller" customClass="CameraViewController" customModule="SSMUtility" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Qvd-mh-rTI">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mln-lu-mkx" userLabel="Preview" customClass="PreviewView" customModule="SSMUtility" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                                <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <gestureRecognizers/>
+                            </view>
+                            <label hidden="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Camera Unavailable" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8b3-ey-DbE" userLabel="Camera Unavailable">
+                                <rect key="frame" x="103.5" y="433.5" width="207" height="29"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                <color key="textColor" red="1" green="1" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BFG-8R-U3a" userLabel="Photo">
+                                <rect key="frame" x="177" y="762" width="60" height="60"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="60" id="cdi-xh-iMo"/>
+                                    <constraint firstAttribute="height" constant="60" id="ebF-dI-PGu"/>
+                                </constraints>
+                                <color key="tintColor" systemColor="systemYellowColor"/>
+                                <state key="normal" image="CapturePhoto">
+                                    <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                </state>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="4"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="capturePhoto:" destination="o6o-2W-7TW" eventType="touchUpInside" id="zCz-Am-90J"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gRC-Mg-08P" userLabel="Camera">
+                                <rect key="frame" x="324" y="762" width="60" height="60"/>
+                                <color key="tintColor" systemColor="systemYellowColor"/>
+                                <state key="normal" image="FlipCamera">
+                                    <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                </state>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="4"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="changeCamera:" destination="o6o-2W-7TW" eventType="touchUpInside" id="5NM-Jb-5Tu"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="8ot-YX-7mM"/>
+                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="mln-lu-mkx" firstAttribute="centerY" secondItem="Qvd-mh-rTI" secondAttribute="centerY" id="7qg-cJ-p3X"/>
+                            <constraint firstItem="BFG-8R-U3a" firstAttribute="width" secondItem="gRC-Mg-08P" secondAttribute="width" id="7v0-uL-KeC"/>
+                            <constraint firstItem="mln-lu-mkx" firstAttribute="trailing" secondItem="8ot-YX-7mM" secondAttribute="trailing" id="9aw-ma-iQW"/>
+                            <constraint firstItem="BFG-8R-U3a" firstAttribute="top" secondItem="gRC-Mg-08P" secondAttribute="top" id="CHF-nX-Ex7"/>
+                            <constraint firstItem="BFG-8R-U3a" firstAttribute="height" secondItem="gRC-Mg-08P" secondAttribute="height" id="EoJ-pp-KUd"/>
+                            <constraint firstItem="8ot-YX-7mM" firstAttribute="trailing" secondItem="BFG-8R-U3a" secondAttribute="trailing" constant="40" id="KKO-6e-wLC"/>
+                            <constraint firstItem="mln-lu-mkx" firstAttribute="leading" secondItem="8ot-YX-7mM" secondAttribute="leading" id="Pa6-gx-cLD"/>
+                            <constraint firstItem="8ot-YX-7mM" firstAttribute="bottom" secondItem="BFG-8R-U3a" secondAttribute="bottom" constant="40" id="PfB-K9-2Rh"/>
+                            <constraint firstItem="8b3-ey-DbE" firstAttribute="centerY" secondItem="Qvd-mh-rTI" secondAttribute="centerY" id="TVG-fU-KK0"/>
+                            <constraint firstItem="8ot-YX-7mM" firstAttribute="trailing" secondItem="gRC-Mg-08P" secondAttribute="trailing" constant="30" id="c1V-kS-Yjd"/>
+                            <constraint firstItem="8b3-ey-DbE" firstAttribute="centerX" secondItem="8ot-YX-7mM" secondAttribute="centerX" id="cEl-Eo-y7k"/>
+                            <constraint firstItem="mln-lu-mkx" firstAttribute="bottom" secondItem="Qvd-mh-rTI" secondAttribute="bottom" id="e36-9r-uNd"/>
+                            <constraint firstItem="BFG-8R-U3a" firstAttribute="centerY" secondItem="Qvd-mh-rTI" secondAttribute="centerY" id="obJ-LT-ESe"/>
+                            <constraint firstItem="8ot-YX-7mM" firstAttribute="centerX" secondItem="BFG-8R-U3a" secondAttribute="centerX" id="pJu-M3-Ylo"/>
+                            <constraint firstItem="gRC-Mg-08P" firstAttribute="top" secondItem="8ot-YX-7mM" secondAttribute="top" constant="30" id="rO0-Bw-CRr">
+                                <variation key="heightClass=compact" constant="20"/>
+                            </constraint>
+                        </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="KKO-6e-wLC"/>
+                                <exclude reference="obJ-LT-ESe"/>
+                                <exclude reference="rO0-Bw-CRr"/>
+                            </mask>
+                        </variation>
+                        <variation key="heightClass=compact">
+                            <mask key="constraints">
+                                <include reference="KKO-6e-wLC"/>
+                                <exclude reference="PfB-K9-2Rh"/>
+                                <exclude reference="c1V-kS-Yjd"/>
+                                <exclude reference="pJu-M3-Ylo"/>
+                                <exclude reference="CHF-nX-Ex7"/>
+                                <include reference="obJ-LT-ESe"/>
+                                <include reference="rO0-Bw-CRr"/>
+                            </mask>
+                        </variation>
+                    </view>
+                    <extendedEdge key="edgesForExtendedLayout"/>
+                    <nil key="simulatedStatusBarMetrics"/>
+                    <connections>
+                        <outlet property="cameraButton" destination="gRC-Mg-08P" id="nW1-ff-pPC"/>
+                        <outlet property="cameraUnavailableLabel" destination="8b3-ey-DbE" id="O7K-nG-oW4"/>
+                        <outlet property="photoButton" destination="BFG-8R-U3a" id="zUz-Fc-4r4"/>
+                        <outlet property="previewView" destination="mln-lu-mkx" id="yN1-YC-cf4"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Ppg-e6-GpG" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-293" y="80"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="CapturePhoto" width="150" height="150"/>
+        <image name="FlipCamera" width="150" height="150"/>
+        <systemColor name="systemYellowColor">
+            <color red="1" green="0.80000000000000004" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>

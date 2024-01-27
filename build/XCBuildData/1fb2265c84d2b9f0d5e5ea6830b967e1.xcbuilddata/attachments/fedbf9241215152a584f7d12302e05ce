@@ -1,0 +1,6 @@
+framework module Pods_SSMUtility_SSMUtilityUITests {
+  umbrella header "Pods-SSMUtility-SSMUtilityUITests-umbrella.h"
+
+  export *
+  module * { export * }
+}

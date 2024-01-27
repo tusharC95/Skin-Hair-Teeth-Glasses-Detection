@@ -1,0 +1,8 @@
+Target dependency graph (4 targets)
+Target 'Pods-SSMUtilityTests' in project 'Pods'
+➜ Explicit dependency on target 'Pods-SSMUtility' in project 'Pods'
+Target 'Pods-SSMUtility-SSMUtilityUITests' in project 'Pods'
+➜ Explicit dependency on target 'OpenCV' in project 'Pods'
+Target 'Pods-SSMUtility' in project 'Pods'
+➜ Explicit dependency on target 'OpenCV' in project 'Pods'
+Target 'OpenCV' in project 'Pods' (no dependencies)
