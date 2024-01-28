@@ -19,4 +19,10 @@ To separate each facial feature, OpenCV has been used.
 ![Screenshot 2024-01-28 at 2 29 44 AM](https://github.com/tusharC95/Skin_Hair_Teeth_Glasses_Detection/assets/64319078/c48e3956-4b31-4c65-b863-4b8aa2a6c89b)
 
 
+Input Image Source:
+
+https://unsplash.com/photos/man-in-gray-denim-jacket-wearing-black-framed-eyeglasses-84E44EdD18o
+
+https://unsplash.com/photos/a-woman-with-glasses-and-a-smile-on-her-face-wA-XieRkQiI
+
 
