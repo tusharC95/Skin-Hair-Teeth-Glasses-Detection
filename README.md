@@ -4,7 +4,7 @@ Using Apple's powerful AVSemanticSegmentationMatte, this app can extract facial 
 Apple's AVCam has been used as a base code.
 
 
-<h3><ins>Sample Output of SemanticSegmentationMatte</ins></h3>
+<h3><ins>Sample Output of Semantic Segmentation Matte</ins></h3>
 
 ![180](https://github.com/tusharC95/Skin_Hair_Teeth_Glasses_Detection/assets/64319078/3d711baa-014e-4f3c-8276-d217b65e5939)
 
