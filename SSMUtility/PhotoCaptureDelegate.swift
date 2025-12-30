@@ -7,7 +7,6 @@
 
 import AVFoundation
 import Photos
-import AVFoundation
 import UIKit
 import Accelerate
 
@@ -24,17 +23,10 @@ class PhotoCaptureProcessor: NSObject {
     
     private let photoProcessingHandler: (Bool) -> Void
     
+    private let photoSavedHandler: (Int, Error?) -> Void
+    
     private var photoData: Data?
-    
-    private var livePhotoCompanionMovieURL: URL?
-    
-    private var portraitEffectsMatteData: Data?
-    
-    private var semanticSegmentationMatteDataArray = [Data]()
     private var maxPhotoProcessingTime: CMTime?
-    
-    // Save the location of captured photos
-    var location: CLLocation?
     
     let wrapper = OpenCVWrapper()
     
@@ -42,24 +34,17 @@ class PhotoCaptureProcessor: NSObject {
          willCapturePhotoAnimation: @escaping () -> Void,
          livePhotoCaptureHandler: @escaping (Bool) -> Void,
          completionHandler: @escaping (PhotoCaptureProcessor) -> Void,
-         photoProcessingHandler: @escaping (Bool) -> Void) {
+         photoProcessingHandler: @escaping (Bool) -> Void,
+         photoSavedHandler: @escaping (Int, Error?) -> Void) {
         self.requestedPhotoSettings = requestedPhotoSettings
         self.willCapturePhotoAnimation = willCapturePhotoAnimation
         self.livePhotoCaptureHandler = livePhotoCaptureHandler
         self.completionHandler = completionHandler
         self.photoProcessingHandler = photoProcessingHandler
+        self.photoSavedHandler = photoSavedHandler
     }
     
     private func didFinish() {
-        if let livePhotoCompanionMoviePath = livePhotoCompanionMovieURL?.path {
-            if FileManager.default.fileExists(atPath: livePhotoCompanionMoviePath) {
-                do {
-                    try FileManager.default.removeItem(atPath: livePhotoCompanionMoviePath)
-                } catch {
-                    print("Could not remove file at url: \(livePhotoCompanionMoviePath)")
-                }
-            }
-        }
         
         completionHandler(self)
     }
@@ -104,6 +89,12 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
     }
     
     func handleMatteData(_ photo: AVCapturePhoto, ssmType: AVSemanticSegmentationMatte.MatteType) {
+        
+        // Check if this feature type is selected by the user
+        guard isFeatureSelected(ssmType) else {
+            print("Skipping \(ssmType) - not selected by user")
+            return
+        }
         
         // Find the semantic segmentation matte image for the specified type.
         guard var segmentationMatte = photo.semanticSegmentationMatte(for: ssmType) else { return }
@@ -154,6 +145,12 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
         }
     }
     
+    /// Check if a semantic segmentation type is selected by the user
+    private func isFeatureSelected(_ ssmType: AVSemanticSegmentationMatte.MatteType) -> Bool {
+        let selectedTypes = Helper.sharedInstance.selectedMatteTypes
+        return selectedTypes.contains(ssmType)
+    }
+    
     /// - Tag: DidFinishProcessingPhoto
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         photoProcessingHandler(false)
@@ -171,45 +168,10 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
             let rotatedImage = flippedImage.rotate(radians: .pi*2)!
             Helper.sharedInstance.selectedImage = rotatedImage
         }
-
-        
-        // A portrait effects matte gets generated only if AVFoundation detects a face.
-        if var portraitEffectsMatte = photo.portraitEffectsMatte {
-            if let orientation = photo.metadata[ String(kCGImagePropertyOrientation) ] as? UInt32 {
-                portraitEffectsMatte = portraitEffectsMatte.applyingExifOrientation(CGImagePropertyOrientation(rawValue: orientation)!)
-            }
-            let portraitEffectsMattePixelBuffer = portraitEffectsMatte.mattingImage
-            let portraitEffectsMatteImage = CIImage( cvImageBuffer: portraitEffectsMattePixelBuffer, options: [ .auxiliaryPortraitEffectsMatte: true ] )
-            
-            guard let perceptualColorSpace = CGColorSpace(name: CGColorSpace.sRGB) else {
-                portraitEffectsMatteData = nil
-                return
-            }
-            portraitEffectsMatteData = context.heifRepresentation(of: portraitEffectsMatteImage,
-                                                                  format: .RGBA8,
-                                                                  colorSpace: perceptualColorSpace,
-                                                                  options: [.portraitEffectsMatteImage: portraitEffectsMatteImage])
-        } else {
-            portraitEffectsMatteData = nil
-        }
         
         for semanticSegmentationType in output.enabledSemanticSegmentationMatteTypes {
             handleMatteData(photo, ssmType: semanticSegmentationType)
         }
-    }
-    
-    /// - Tag: DidFinishRecordingLive
-    func photoOutput(_ output: AVCapturePhotoOutput, didFinishRecordingLivePhotoMovieForEventualFileAt outputFileURL: URL, resolvedSettings: AVCaptureResolvedPhotoSettings) {
-        livePhotoCaptureHandler(false)
-    }
-    
-    /// - Tag: DidFinishProcessingLive
-    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingLivePhotoToMovieFileAt outputFileURL: URL, duration: CMTime, photoDisplayTime: CMTime, resolvedSettings: AVCaptureResolvedPhotoSettings, error: Error?) {
-        if error != nil {
-            print("Error processing Live Photo companion movie: \(String(describing: error))")
-            return
-        }
-        livePhotoCompanionMovieURL = outputFileURL
     }
     
     /// - Tag: DidFinishCapture
@@ -237,6 +199,10 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
         
         Helper.sharedInstance.segmentationImageArray.removeAll()
         
+        // Count how many images will be saved (1 original + extracted features)
+        let featureCount = Helper.sharedInstance.selectedFeatures.count
+        let totalSavedCount = 1 + featureCount // Original photo + feature extractions
+        
         PHPhotoLibrary.requestAuthorization { status in
             if status == .authorized {
                 PHPhotoLibrary.shared().performChanges({
@@ -245,25 +211,19 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
                     options.uniformTypeIdentifier = self.requestedPhotoSettings.processedFileType.map { $0.rawValue }
                     creationRequest.addResource(with: .photo, data: photoData, options: options)
                     
-                    // Specify the location the photo was taken
-                    creationRequest.location = self.location
-                    // Save Portrait Effects Matte to Photos Library only if it was generated
-                    for semanticSegmentationMatteData in self.semanticSegmentationMatteDataArray {
-                        let creationRequest = PHAssetCreationRequest.forAsset()
-                        creationRequest.addResource(with: .photo,
-                                                    data: semanticSegmentationMatteData,
-                                                    options: nil)
-                    }
-                    
-                }, completionHandler: { _, error in
+                }, completionHandler: { success, error in
                     if let error = error {
                         print("Error occurred while saving photo to photo library: \(error)")
+                        self.photoSavedHandler(0, error)
+                    } else {
+                        self.photoSavedHandler(totalSavedCount, nil)
                     }
                     
                     self.didFinish()
                 }
                 )
             } else {
+                self.photoSavedHandler(0, NSError(domain: "Unmask Lab", code: -1, userInfo: [NSLocalizedDescriptionKey: "Photo Library access denied"]))
                 self.didFinish()
             }
         }

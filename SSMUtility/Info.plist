@@ -21,8 +21,6 @@
 			</array>
 		</dict>
 	</dict>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>AVCam uses the microphone to record sound during Live Photos and movies.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>Launch Screen</string>
 	<key>LSRequiresIPhoneOS</key>
@@ -33,13 +31,17 @@
 	<true/>
 	<key>UIRequiresFullScreen</key>
 	<true/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>CFBundleDisplayName</key>
+	<string>Unmask Lab</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>AVCam saves captured photos and videos to your photo library.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>AVCam uses your location to tag where photos and videos are taken.</string>
+	<string>Unmask Lab saves captured photos and extracted facial features (skin, hair, teeth, glasses) to your photo library.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>AVCam uses the camera to take photos and video.</string>
+	<string>Unmask Lab uses the camera to capture photos for facial feature extraction.</string>
 </dict>
 </plist>

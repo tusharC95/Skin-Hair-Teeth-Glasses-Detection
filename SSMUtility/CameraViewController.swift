@@ -7,7 +7,6 @@ The app's primary view controller that presents the camera interface.
 
 import UIKit
 import AVFoundation
-import CoreLocation
 import Photos
 
 class CameraViewController: UIViewController {
@@ -17,8 +16,16 @@ class CameraViewController: UIViewController {
     var windowOrientation: UIInterfaceOrientation {
         return view.window?.windowScene?.interfaceOrientation ?? .unknown
     }
-	
-	let locationManager = CLLocationManager()
+    
+    // MARK: - Feature Selection UI
+    
+    private var featureSelectionView: UIView!
+    private var featureButtons: [FacialFeature: UIButton] = [:]
+    private var allButton: UIButton!
+    
+    // MARK: - Orientation Warning
+    
+    private var orientationWarningView: UIView?
 
     // MARK: View Controller Life Cycle
     
@@ -31,17 +38,14 @@ class CameraViewController: UIViewController {
         
         // Set up the video preview view.
         previewView.session = session
-		
-		// Request location authorization so photos and videos can be tagged with their location.
-		if locationManager.authorizationStatus == .notDetermined {
-			locationManager.requestWhenInUseAuthorization()
-		}
-		
-        /*
-         Check the video authorization status. Video access is required and audio
-         access is optional. If the user denies audio access, AVCam won't
-         record audio during movie recording.
-         */
+        
+        // Set up feature selection UI
+        setupFeatureSelectionUI()
+        
+        // Set up orientation monitoring
+        setupOrientationMonitoring()
+        
+        // Check the video authorization status. Video access is required.
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
             // The user has previously granted access to the camera.
@@ -52,9 +56,6 @@ class CameraViewController: UIViewController {
              The user has not yet been presented with the option to grant
              video access. Suspend the session queue to delay session
              setup until the access request has completed.
-             
-             Note that audio access will be implicitly requested when we
-             create an AVCaptureDeviceInput for audio during session setup.
              */
             sessionQueue.suspend()
             AVCaptureDevice.requestAccess(for: .video, completionHandler: { granted in
@@ -100,11 +101,20 @@ class CameraViewController: UIViewController {
                 self.session.startRunning()
                 self.isSessionRunning = self.session.isRunning
                 
+                DispatchQueue.main.async {
+                    // Ensure camera unavailable label is hidden
+                    self.cameraUnavailableLabel.isHidden = true
+                }
+                
             case .notAuthorized:
                 DispatchQueue.main.async {
-                    let changePrivacySetting = "AVCam doesn't have permission to use the camera, please change privacy settings"
+                    // Show the camera unavailable label
+                    self.cameraUnavailableLabel.isHidden = false
+                    self.featureSelectionView.isHidden = true
+                    
+                    let changePrivacySetting = "Unmask Lab doesn't have permission to use the camera, please change privacy settings"
                     let message = NSLocalizedString(changePrivacySetting, comment: "Alert message when the user has denied access to the camera")
-                    let alertController = UIAlertController(title: "AVCam", message: message, preferredStyle: .alert)
+                    let alertController = UIAlertController(title: "Unmask Lab", message: message, preferredStyle: .alert)
                     
                     alertController.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"),
                                                             style: .cancel,
@@ -123,9 +133,13 @@ class CameraViewController: UIViewController {
                 
             case .configurationFailed:
                 DispatchQueue.main.async {
+                    // Show the camera unavailable label
+                    self.cameraUnavailableLabel.isHidden = false
+                    self.featureSelectionView.isHidden = true
+                    
                     let alertMsg = "Alert message when something goes wrong during capture session configuration"
                     let message = NSLocalizedString("Unable to capture media", comment: alertMsg)
-                    let alertController = UIAlertController(title: "AVCam", message: message, preferredStyle: .alert)
+                    let alertController = UIAlertController(title: "Unmask Lab", message: message, preferredStyle: .alert)
                     
                     alertController.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"),
                                                             style: .cancel,
@@ -146,27 +160,17 @@ class CameraViewController: UIViewController {
             }
         }
         
+        // Stop orientation monitoring
+        UIDevice.current.endGeneratingDeviceOrientationNotifications()
+        NotificationCenter.default.removeObserver(self, name: UIDevice.orientationDidChangeNotification, object: nil)
+        
         super.viewWillDisappear(animated)
     }
     
    
     
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        return .all
-    }
-    
-    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransition(to: size, with: coordinator)
-        
-        if let videoPreviewLayerConnection = previewView.videoPreviewLayer.connection {
-            let deviceOrientation = UIDevice.current.orientation
-            guard let newVideoOrientation = AVCaptureVideoOrientation(deviceOrientation: deviceOrientation),
-                deviceOrientation.isPortrait || deviceOrientation.isLandscape else {
-                    return
-            }
-            
-            videoPreviewLayerConnection.videoOrientation = newVideoOrientation
-        }
+        return .portrait
     }
     
     // MARK: Session Management
@@ -241,9 +245,6 @@ class CameraViewController: UIViewController {
                      You can manipulate UIView only on the main thread.
                      Note: As an exception to the above rule, it's not necessary to serialize video orientation changes
                      on the AVCaptureVideoPreviewLayer’s connection with other session manipulation.
-                     
-                     Use the window scene's orientation as the initial video orientation. Subsequent orientation changes are
-                     handled by CameraViewController.viewWillTransition(to:with:).
                      */
                     var initialVideoOrientation: AVCaptureVideoOrientation = .portrait
                     if self.windowOrientation != .unknown {
@@ -267,20 +268,6 @@ class CameraViewController: UIViewController {
             return
         }
         
-        // Add an audio input device.
-        do {
-            let audioDevice = AVCaptureDevice.default(for: .audio)
-            let audioDeviceInput = try AVCaptureDeviceInput(device: audioDevice!)
-            
-            if session.canAddInput(audioDeviceInput) {
-                session.addInput(audioDeviceInput)
-            } else {
-                print("Could not add audio device input to the session")
-            }
-        } catch {
-            print("Could not create audio device input: \(error)")
-        }
-        
         // Add the photo output.
         if session.canAddOutput(photoOutput) {
             session.addOutput(photoOutput)
@@ -292,10 +279,7 @@ class CameraViewController: UIViewController {
             photoOutput.enabledSemanticSegmentationMatteTypes = photoOutput.availableSemanticSegmentationMatteTypes
             selectedSemanticSegmentationMatteTypes = photoOutput.availableSemanticSegmentationMatteTypes
             photoOutput.maxPhotoQualityPrioritization = .quality
-            livePhotoMode = photoOutput.isLivePhotoCaptureSupported ? .on : .off
             depthDataDeliveryMode = photoOutput.isDepthDataDeliverySupported ? .on : .off
-            portraitEffectsMatteDeliveryMode = photoOutput.isPortraitEffectsMatteDeliverySupported ? .on : .off
-            photoQualityPrioritizationMode = .balanced
             
         } else {
             print("Could not add photo output to the session")
@@ -305,12 +289,6 @@ class CameraViewController: UIViewController {
         }
         
         session.commitConfiguration()
-    }
-
-    
-    private enum CaptureMode: Int {
-        case photo = 0
-        case movie = 1
     }
     
     // MARK: Device Configuration
@@ -433,18 +411,9 @@ class CameraViewController: UIViewController {
             if let previewPhotoPixelFormatType = photoSettings.availablePreviewPhotoPixelFormatTypes.first {
                 photoSettings.previewPhotoFormat = [kCVPixelBufferPixelFormatTypeKey as String: previewPhotoPixelFormatType]
             }
-            // Live Photo capture is not supported in movie mode.
-            if self.livePhotoMode == .on && self.photoOutput.isLivePhotoCaptureSupported {
-                let livePhotoMovieFileName = NSUUID().uuidString
-                let livePhotoMovieFilePath = (NSTemporaryDirectory() as NSString).appendingPathComponent((livePhotoMovieFileName as NSString).appendingPathExtension("mov")!)
-                photoSettings.livePhotoMovieFileURL = URL(fileURLWithPath: livePhotoMovieFilePath)
-            }
             
             photoSettings.isDepthDataDeliveryEnabled = (self.depthDataDeliveryMode == .on
                 && self.photoOutput.isDepthDataDeliveryEnabled)
-            
-            photoSettings.isPortraitEffectsMatteDeliveryEnabled = (self.portraitEffectsMatteDeliveryMode == .on
-                && self.photoOutput.isPortraitEffectsMatteDeliveryEnabled)
             
             if photoSettings.isDepthDataDeliveryEnabled {
                 if !self.photoOutput.availableSemanticSegmentationMatteTypes.isEmpty {
@@ -452,10 +421,10 @@ class CameraViewController: UIViewController {
                 }
             }
             
-            photoSettings.photoQualityPrioritization = self.photoQualityPrioritizationMode
+            photoSettings.photoQualityPrioritization = .balanced
             
             let photoCaptureProcessor = PhotoCaptureProcessor(with: photoSettings, willCapturePhotoAnimation: {
-                // Flash the screen to signal that AVCam took a photo.
+                // Flash the screen to signal that a photo was taken.
                 DispatchQueue.main.async {
                     self.previewView.videoPreviewLayer.opacity = 0
                     UIView.animate(withDuration: 0.25) {
@@ -480,11 +449,12 @@ class CameraViewController: UIViewController {
                         self.spinner.stopAnimating()
                     }
                 }
+            }, photoSavedHandler: { savedCount, error in
+                DispatchQueue.main.async {
+                    self.showPhotoSavedAlert(savedCount: savedCount, error: error)
+                }
             }
             )
-			
-			// Specify the location the photo was taken
-			photoCaptureProcessor.location = self.locationManager.location
             
             // The photo output holds a weak reference to the photo capture delegate and stores it in an array to maintain a strong reference.
             self.inProgressPhotoCaptureDelegates[photoCaptureProcessor.requestedPhotoSettings.uniqueID] = photoCaptureProcessor
@@ -492,28 +462,12 @@ class CameraViewController: UIViewController {
         }
     }
     
-    private enum LivePhotoMode {
-        case on
-        case off
-    }
-    
     private enum DepthDataDeliveryMode {
         case on
         case off
     }
-    
-    private enum PortraitEffectsMatteDeliveryMode {
-        case on
-        case off
-    }
-    
-    private var livePhotoMode: LivePhotoMode = .off
-    
+        
     private var depthDataDeliveryMode: DepthDataDeliveryMode = .off
-    
-    private var portraitEffectsMatteDeliveryMode: PortraitEffectsMatteDeliveryMode = .off
-    
-    private var photoQualityPrioritizationMode: AVCapturePhotoOutput.QualityPrioritization = .balanced
     
     // MARK: KVO and Notifications
     
@@ -538,6 +492,295 @@ class CameraViewController: UIViewController {
             keyValueObservation.invalidate()
         }
         keyValueObservations.removeAll()
+    }
+    
+    // MARK: - Feature Selection UI Setup
+    
+    private func setupFeatureSelectionUI() {
+        // Container view for feature buttons
+        featureSelectionView = UIView()
+        featureSelectionView.translatesAutoresizingMaskIntoConstraints = false
+        featureSelectionView.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        featureSelectionView.layer.cornerRadius = 16
+        view.addSubview(featureSelectionView)
+        
+        // Create horizontal stack view for buttons
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        stackView.distribution = .fillEqually
+        stackView.spacing = 8
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        featureSelectionView.addSubview(stackView)
+        
+        // Create "All" button
+        allButton = createFeatureButton(title: "All", icon: "checkmark.circle.fill")
+        allButton.addTarget(self, action: #selector(allButtonTapped), for: .touchUpInside)
+        stackView.addArrangedSubview(allButton)
+        
+        // Create individual feature buttons
+        for feature in FacialFeature.allCases {
+            let button = createFeatureButton(title: feature.rawValue, icon: feature.icon)
+            button.tag = FacialFeature.allCases.firstIndex(of: feature)!
+            button.addTarget(self, action: #selector(featureButtonTapped(_:)), for: .touchUpInside)
+            featureButtons[feature] = button
+            stackView.addArrangedSubview(button)
+        }
+        
+        // Layout constraints - overlay on top of camera preview
+        NSLayoutConstraint.activate([
+            featureSelectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            featureSelectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            featureSelectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            featureSelectionView.heightAnchor.constraint(equalToConstant: 70),
+            
+            stackView.leadingAnchor.constraint(equalTo: featureSelectionView.leadingAnchor, constant: 8),
+            stackView.trailingAnchor.constraint(equalTo: featureSelectionView.trailingAnchor, constant: -8),
+            stackView.topAnchor.constraint(equalTo: featureSelectionView.topAnchor, constant: 8),
+            stackView.bottomAnchor.constraint(equalTo: featureSelectionView.bottomAnchor, constant: -8)
+        ])
+        
+        // Update initial button states
+        updateFeatureButtonStates()
+    }
+    
+    private func createFeatureButton(title: String, icon: String) -> UIButton {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        var config = UIButton.Configuration.filled()
+        config.title = title
+        config.image = UIImage(systemName: icon)
+        config.imagePlacement = .top
+        config.imagePadding = 4
+        config.cornerStyle = .medium
+        config.baseBackgroundColor = UIColor.darkGray
+        config.baseForegroundColor = .white
+        
+        // Smaller font for compact display
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = incoming
+            outgoing.font = UIFont.systemFont(ofSize: 10, weight: .medium)
+            return outgoing
+        }
+        
+        button.configuration = config
+        return button
+    }
+    
+    @objc private func allButtonTapped() {
+        Helper.sharedInstance.selectAllFeatures()
+        updateFeatureButtonStates()
+        
+        // Haptic feedback
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+    }
+    
+    @objc private func featureButtonTapped(_ sender: UIButton) {
+        let feature = FacialFeature.allCases[sender.tag]
+        Helper.sharedInstance.toggleFeature(feature)
+        updateFeatureButtonStates()
+        
+        // Haptic feedback
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+    }
+    
+    private func updateFeatureButtonStates() {
+        let helper = Helper.sharedInstance
+        
+        // Update "All" button
+        updateButtonAppearance(allButton, isSelected: helper.areAllFeaturesSelected)
+        
+        // Update individual feature buttons
+        for feature in FacialFeature.allCases {
+            if let button = featureButtons[feature] {
+                updateButtonAppearance(button, isSelected: helper.isFeatureSelected(feature))
+            }
+        }
+        
+        // Update selected segmentation types for capture
+        updateSelectedSegmentationTypes()
+    }
+    
+    private func updateButtonAppearance(_ button: UIButton, isSelected: Bool) {
+        var config = button.configuration
+        if isSelected {
+            config?.baseBackgroundColor = UIColor.systemYellow
+            config?.baseForegroundColor = .black
+        } else {
+            config?.baseBackgroundColor = UIColor.darkGray.withAlphaComponent(0.8)
+            config?.baseForegroundColor = .white.withAlphaComponent(0.6)
+        }
+        button.configuration = config
+    }
+    
+    private func updateSelectedSegmentationTypes() {
+        let helper = Helper.sharedInstance
+        
+        sessionQueue.async {
+            // Filter available types based on user selection
+            let availableTypes = self.photoOutput.availableSemanticSegmentationMatteTypes
+            self.selectedSemanticSegmentationMatteTypes = availableTypes.filter { type in
+                helper.selectedMatteTypes.contains(type)
+            }
+        }
+    }
+    
+    // MARK: - Orientation Monitoring
+    
+    private func setupOrientationMonitoring() {
+        // Enable device orientation notifications
+        UIDevice.current.beginGeneratingDeviceOrientationNotifications()
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(deviceOrientationDidChange),
+            name: UIDevice.orientationDidChangeNotification,
+            object: nil
+        )
+        
+        // Check initial orientation
+        checkDeviceOrientation()
+    }
+    
+    @objc private func deviceOrientationDidChange() {
+        checkDeviceOrientation()
+    }
+    
+    private func checkDeviceOrientation() {
+        let orientation = UIDevice.current.orientation
+        
+        if orientation.isLandscape {
+            showOrientationWarning()
+        } else if orientation.isPortrait {
+            hideOrientationWarning()
+        }
+        // Ignore .faceUp, .faceDown, .unknown - keep current state
+    }
+    
+    private func showOrientationWarning() {
+        guard orientationWarningView == nil else { return }
+        
+        // Create overlay
+        let overlay = UIView()
+        overlay.backgroundColor = UIColor.black.withAlphaComponent(0.85)
+        overlay.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(overlay)
+        
+        // Create content stack
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.alignment = .center
+        stackView.spacing = 16
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        overlay.addSubview(stackView)
+        
+        // Rotation icon - SF Symbol with gold tint
+        let iconImageView = UIImageView()
+        let iconConfig = UIImage.SymbolConfiguration(pointSize: 60, weight: .medium)
+        iconImageView.image = UIImage(systemName: "iphone.gen3", withConfiguration: iconConfig)
+        iconImageView.tintColor = .systemYellow
+        iconImageView.contentMode = .scaleAspectFit
+        stackView.addArrangedSubview(iconImageView)
+        
+        // Add rotation animation to icon
+        let rotationAnimation = CABasicAnimation(keyPath: "transform.rotation.z")
+        rotationAnimation.fromValue = -CGFloat.pi / 4
+        rotationAnimation.toValue = 0
+        rotationAnimation.duration = 0.6
+        rotationAnimation.autoreverses = true
+        rotationAnimation.repeatCount = .infinity
+        iconImageView.layer.add(rotationAnimation, forKey: "rotation")
+        
+        // Warning title
+        let titleLabel = UILabel()
+        titleLabel.text = "Rotate to Portrait"
+        titleLabel.font = .systemFont(ofSize: 22, weight: .bold)
+        titleLabel.textColor = .white
+        stackView.addArrangedSubview(titleLabel)
+        
+        // Warning message
+        let messageLabel = UILabel()
+        messageLabel.text = "Please hold your device upright\nto capture photos"
+        messageLabel.font = .systemFont(ofSize: 16)
+        messageLabel.textColor = .white.withAlphaComponent(0.8)
+        messageLabel.textAlignment = .center
+        messageLabel.numberOfLines = 0
+        stackView.addArrangedSubview(messageLabel)
+        
+        // Layout
+        NSLayoutConstraint.activate([
+            overlay.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            overlay.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            overlay.topAnchor.constraint(equalTo: view.topAnchor),
+            overlay.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            stackView.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
+            stackView.centerYAnchor.constraint(equalTo: overlay.centerYAnchor)
+        ])
+        
+        // Animate in
+        overlay.alpha = 0
+        UIView.animate(withDuration: 0.3) {
+            overlay.alpha = 1
+        }
+        
+        orientationWarningView = overlay
+        
+        // Disable capture
+        photoButton.isEnabled = false
+    }
+    
+    private func hideOrientationWarning() {
+        guard let overlay = orientationWarningView else { return }
+        
+        // Clear reference immediately to prevent duplicate calls
+        orientationWarningView = nil
+        
+        UIView.animate(withDuration: 0.3, animations: {
+            overlay.alpha = 0
+        }) { _ in
+            overlay.removeFromSuperview()
+        }
+        
+        // Re-enable capture button
+        photoButton.isEnabled = true
+    }
+    
+    // MARK: - Photo Saved Alert
+    
+    private func showPhotoSavedAlert(savedCount: Int, error: Error?) {
+        let alert: UIAlertController
+        
+        if let error = error {
+            // Error alert
+            alert = UIAlertController(
+                title: "Save Failed",
+                message: error.localizedDescription,
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+        } else {
+            // Success alert
+            let featureNames = Helper.sharedInstance.selectedFeatures.map { $0.rawValue }.joined(separator: ", ")
+            let message: String
+            
+            if Helper.sharedInstance.selectedFeatures.isEmpty {
+                message = "Photo saved to your library."
+            } else {
+                message = "Photo and extracted features (\(featureNames)) saved to your library."
+            }
+            
+            alert = UIAlertController(
+                title: "✓ Saved!",
+                message: message,
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+        }
+        
+        present(alert, animated: true)
     }
   
 }
