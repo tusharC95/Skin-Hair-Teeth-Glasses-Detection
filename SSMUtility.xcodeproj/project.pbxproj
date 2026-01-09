@@ -25,6 +25,7 @@
 		CAM003000000000000000001 /* OrientationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAM003000000000000000002 /* OrientationManager.swift */; };
 		CAM004000000000000000001 /* FeatureSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAM004000000000000000002 /* FeatureSelectionView.swift */; };
 		CAM005000000000000000001 /* OrientationWarningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAM005000000000000000002 /* OrientationWarningView.swift */; };
+		GAL001000000000000000001 /* GalleryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = GAL001000000000000000002 /* GalleryViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,6 +59,7 @@
 		CAM003000000000000000002 /* OrientationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationManager.swift; sourceTree = "<group>"; };
 		CAM004000000000000000002 /* FeatureSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureSelectionView.swift; sourceTree = "<group>"; };
 		CAM005000000000000000002 /* OrientationWarningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationWarningView.swift; sourceTree = "<group>"; };
+		GAL001000000000000000002 /* GalleryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +116,7 @@
 			isa = PBXGroup;
 			children = (
 				CAM000000000000000000001 /* Camera */,
+				GAL000000000000000000001 /* Gallery */,
 				5B134ADC27784B34008654AF /* OpenCVWrapper */,
 				5B5144A7277790BB00C332C9 /* AppDelegate.swift */,
 				5B5144A9277790BB00C332C9 /* SceneDelegate.swift */,
@@ -121,7 +124,6 @@
 				A1B2C3D4E5F6A7B8C9D0E1F3 /* ImageStorageManager.swift */,
 				5B5144DB277791DB00C332C9 /* PreviewView.swift */,
 				5B5144E12777920400C332C9 /* PhotoCaptureDelegate.swift */,
-				A1B2C3D4E5F6A7B8C9D0E1F5 /* GalleryView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E1F7 /* ImageDetailView.swift */,
 				5B5144B0277790BC00C332C9 /* Assets.xcassets */,
 				5B5144B2277790BC00C332C9 /* LaunchScreen.storyboard */,
@@ -149,6 +151,15 @@
 				CAM005000000000000000002 /* OrientationWarningView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		GAL000000000000000000001 /* Gallery */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F6A7B8C9D0E1F5 /* GalleryView.swift */,
+				GAL001000000000000000002 /* GalleryViewModel.swift */,
+			);
+			path = Gallery;
 			sourceTree = "<group>";
 		};
 		C84BAD0FA7E5E79822A8C92C /* Pods */ = {
@@ -276,6 +287,7 @@
 				CAM003000000000000000001 /* OrientationManager.swift in Sources */,
 				CAM004000000000000000001 /* FeatureSelectionView.swift in Sources */,
 				CAM005000000000000000001 /* OrientationWarningView.swift in Sources */,
+				GAL001000000000000000001 /* GalleryViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
