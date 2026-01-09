@@ -9,7 +9,7 @@ on:
 
 jobs:
   build_with_signing:
-    runs-on: macos-latest
+    runs-on: macos-26  # macOS 26 with Xcode 26 for iOS 26+ support
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     steps:
@@ -24,10 +24,13 @@ jobs:
             *Unmask Lab iOS Build Starting...*
             Branch: `${{ github.ref_name }}`
             Triggered by: ${{ github.actor }}
+            Runner: macOS 26 (iOS 26 SDK)
         if: always()
 
-      - name: check Xcode version
-        run: /usr/bin/xcodebuild -version
+      - name: Check Xcode and iOS SDK version
+        run: |
+          /usr/bin/xcodebuild -version
+          xcodebuild -showsdks | grep iphoneos
 
       - name: checkout repository
         uses: actions/checkout@v4
@@ -77,6 +80,7 @@ jobs:
           -sdk iphoneos \
           -configuration Debug \
           -destination generic/platform=iOS \
+          IPHONEOS_DEPLOYMENT_TARGET=26.0 \
           clean archive
 
       - name: export ipa
