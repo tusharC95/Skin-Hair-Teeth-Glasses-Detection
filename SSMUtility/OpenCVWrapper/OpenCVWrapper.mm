@@ -77,7 +77,7 @@ using namespace std;
     cv::Mat ssmInputImageHLS;
     
     Mat mask(originalInputImageMat.size(),CV_8UC1, cv::Scalar(0));
-    int sensitivity = 15;
+    int sensitivity = 50;
     
     Scalar lower_white = Scalar(0, 255-sensitivity, 0);
     Scalar upper_white = Scalar(255, 255, sensitivity);
