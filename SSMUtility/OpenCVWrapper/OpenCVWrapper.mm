@@ -5,21 +5,20 @@
 //  Created by Prerna Chavan on 28/07/21.
 //
 
-#import "OpenCVWrapper.h"
-
-
-#import <opencv2/imgcodecs/ios.h>
-
-
+// Import OpenCV headers BEFORE any Apple headers to avoid NO macro conflict
 #ifdef __cplusplus
-#import <opencv2/opencv.hpp>
-#import "opencv2/imgproc.hpp"
-#import <opencv2/imgcodecs/ios.h>
 #import <opencv2/core/core.hpp>
+#import <opencv2/imgproc.hpp>
 #import <opencv2/highgui/highgui.hpp>
 #import <opencv2/video/background_segm.hpp>
-
 #endif
+
+// Now import Apple headers
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+#import <opencv2/imgcodecs/ios.h>
+
+#import "OpenCVWrapper.h"
 
 using namespace cv;
 using namespace std;
