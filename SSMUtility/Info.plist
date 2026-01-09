@@ -21,27 +21,7 @@
 			</array>
 		</dict>
 	</dict>
-	<key>UILaunchStoryboardName</key>
-	<string>Launch Screen</string>
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>UIStatusBarHidden</key>
-	<true/>
-	<key>UIRequiresFullScreen</key>
-	<true/>
-	<key>UISupportedInterfaceOrientations</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-	</array>
-	<key>UIMainStoryboardFile</key>
-	<string>Main</string>
-	<key>CFBundleDisplayName</key>
-	<string>Unmask Lab</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Unmask Lab saves captured photos and extracted facial features (skin, hair, teeth, glasses) to your photo library.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Unmask Lab uses the camera to capture photos for facial feature extraction.</string>
 </dict>
 </plist>
