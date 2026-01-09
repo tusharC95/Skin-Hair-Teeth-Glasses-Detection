@@ -325,15 +325,3 @@ class CameraSessionManager {
         return photoOutput.isDepthDataDeliverySupported
     }
 }
-
-// MARK: - Discovery Session Extension
-
-extension AVCaptureDevice.DiscoverySession {
-    var uniqueDevicePositionsCount: Int {
-        var positions = [AVCaptureDevice.Position]()
-        for device in devices where !positions.contains(device.position) {
-            positions.append(device.position)
-        }
-        return positions.count
-    }
-}

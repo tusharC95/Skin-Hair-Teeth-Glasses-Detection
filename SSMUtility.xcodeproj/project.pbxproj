@@ -27,6 +27,7 @@
 		CAM005000000000000000001 /* OrientationWarningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAM005000000000000000002 /* OrientationWarningView.swift */; };
 		GAL001000000000000000001 /* GalleryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = GAL001000000000000000002 /* GalleryViewModel.swift */; };
 		GAL002000000000000000001 /* ImageDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = GAL002000000000000000002 /* ImageDetailViewModel.swift */; };
+		EXT001000000000000000001 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EXT001000000000000000002 /* Extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -62,6 +63,7 @@
 		CAM005000000000000000002 /* OrientationWarningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationWarningView.swift; sourceTree = "<group>"; };
 		GAL001000000000000000002 /* GalleryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryViewModel.swift; sourceTree = "<group>"; };
 		GAL002000000000000000002 /* ImageDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDetailViewModel.swift; sourceTree = "<group>"; };
+		EXT001000000000000000002 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,6 +125,7 @@
 				5B5144A7277790BB00C332C9 /* AppDelegate.swift */,
 				5B5144A9277790BB00C332C9 /* SceneDelegate.swift */,
 				5B5144E327779C5700C332C9 /* Helper.swift */,
+				EXT001000000000000000002 /* Extensions.swift */,
 				A1B2C3D4E5F6A7B8C9D0E1F3 /* ImageStorageManager.swift */,
 				5B5144DB277791DB00C332C9 /* PreviewView.swift */,
 				5B5144E12777920400C332C9 /* PhotoCaptureDelegate.swift */,
@@ -292,6 +295,7 @@
 				CAM005000000000000000001 /* OrientationWarningView.swift in Sources */,
 				GAL001000000000000000001 /* GalleryViewModel.swift in Sources */,
 				GAL002000000000000000001 /* ImageDetailViewModel.swift in Sources */,
+				EXT001000000000000000001 /* Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
