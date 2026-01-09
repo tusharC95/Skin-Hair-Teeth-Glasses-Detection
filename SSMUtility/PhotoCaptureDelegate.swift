@@ -212,9 +212,9 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
             self.photoSavedHandler(savedCount, nil)
         } else {
             self.photoSavedHandler(0, NSError(domain: "Unmask Lab", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to save images"]))
-        }
-        
-        self.didFinish()
+                    }
+                    
+                    self.didFinish()
     }
     
     func sFunc_imageFixOrientation(img: UIImage) -> UIImage {

@@ -201,6 +201,30 @@ class ImageStorageManager {
         }
     }
     
+    /// Delete multiple images at once
+    func deleteImages(_ imagesToDelete: [SavedImage]) -> Int {
+        var deletedCount = 0
+        var allImages = loadAllImageMetadata()
+        let idsToDelete = Set(imagesToDelete.map { $0.id })
+        
+        for image in imagesToDelete {
+            let fileURL = imagesDirectory.appendingPathComponent(image.filename)
+            do {
+                try fileManager.removeItem(at: fileURL)
+                deletedCount += 1
+            } catch {
+                print("Error deleting image \(image.filename): \(error)")
+            }
+        }
+        
+        // Update metadata once for all deletions
+        allImages.removeAll { idsToDelete.contains($0.id) }
+        saveAllImageMetadata(allImages)
+        
+        print("Deleted \(deletedCount) of \(imagesToDelete.count) images")
+        return deletedCount
+    }
+    
     /// Delete all images
     func deleteAllImages() {
         do {
