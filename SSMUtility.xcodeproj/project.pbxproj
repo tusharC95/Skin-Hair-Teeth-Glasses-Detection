@@ -11,7 +11,6 @@
 		5B466978277880AF00169644 /* OpenCVWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5B134ADF27784B54008654AF /* OpenCVWrapper.mm */; };
 		5B5144A8277790BB00C332C9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B5144A7277790BB00C332C9 /* AppDelegate.swift */; };
 		5B5144AA277790BB00C332C9 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B5144A9277790BB00C332C9 /* SceneDelegate.swift */; };
-		5B5144AF277790BB00C332C9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5B5144AD277790BB00C332C9 /* Main.storyboard */; };
 		5B5144B1277790BC00C332C9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5B5144B0277790BC00C332C9 /* Assets.xcassets */; };
 		5B5144B4277790BC00C332C9 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5B5144B2277790BC00C332C9 /* LaunchScreen.storyboard */; };
 		5B5144DC277791DB00C332C9 /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B5144DB277791DB00C332C9 /* PreviewView.swift */; };
@@ -21,6 +20,11 @@
 		A1B2C3D4E5F6A7B8C9D0E1F2 /* ImageStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F3 /* ImageStorageManager.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E1F4 /* GalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F5 /* GalleryView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E1F6 /* ImageDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F7 /* ImageDetailView.swift */; };
+		CAM001000000000000000001 /* CameraSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAM001000000000000000002 /* CameraSessionManager.swift */; };
+		CAM002000000000000000001 /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAM002000000000000000002 /* CameraViewModel.swift */; };
+		CAM003000000000000000001 /* OrientationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAM003000000000000000002 /* OrientationManager.swift */; };
+		CAM004000000000000000001 /* FeatureSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAM004000000000000000002 /* FeatureSelectionView.swift */; };
+		CAM005000000000000000001 /* OrientationWarningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAM005000000000000000002 /* OrientationWarningView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,7 +39,6 @@
 		5B5144A4277790BB00C332C9 /* SSMUtility.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SSMUtility.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5B5144A7277790BB00C332C9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		5B5144A9277790BB00C332C9 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		5B5144AE277790BB00C332C9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		5B5144B0277790BC00C332C9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5B5144B3277790BC00C332C9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		5B5144B5277790BC00C332C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -43,13 +46,18 @@
 		5B5144DD277791EE00C332C9 /* CameraViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
 		5B5144E12777920400C332C9 /* PhotoCaptureDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoCaptureDelegate.swift; sourceTree = "<group>"; };
 		5B5144E327779C5700C332C9 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
+		88F9604C9F3CE7D1187CDABE /* Pods-SSMUtility.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SSMUtility.release.xcconfig"; path = "Target Support Files/Pods-SSMUtility/Pods-SSMUtility.release.xcconfig"; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F3 /* ImageStorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageStorageManager.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F5 /* GalleryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F7 /* ImageDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDetailView.swift; sourceTree = "<group>"; };
-		88F9604C9F3CE7D1187CDABE /* Pods-SSMUtility.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SSMUtility.release.xcconfig"; path = "Target Support Files/Pods-SSMUtility/Pods-SSMUtility.release.xcconfig"; sourceTree = "<group>"; };
 		BD309CE0C621B5F6EC0D554F /* Pods-SSMUtility.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SSMUtility.debug.xcconfig"; path = "Target Support Files/Pods-SSMUtility/Pods-SSMUtility.debug.xcconfig"; sourceTree = "<group>"; };
 		E10D7151FC042F59726E4357 /* Pods_SSMUtility.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SSMUtility.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F0C4F0D1EB1CA10B872184C8 /* Pods-SSMUtility-SSMUtilityUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SSMUtility-SSMUtilityUITests.debug.xcconfig"; path = "Target Support Files/Pods-SSMUtility-SSMUtilityUITests/Pods-SSMUtility-SSMUtilityUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		CAM001000000000000000002 /* CameraSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSessionManager.swift; sourceTree = "<group>"; };
+		CAM002000000000000000002 /* CameraViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewModel.swift; sourceTree = "<group>"; };
+		CAM003000000000000000002 /* OrientationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationManager.swift; sourceTree = "<group>"; };
+		CAM004000000000000000002 /* FeatureSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureSelectionView.swift; sourceTree = "<group>"; };
+		CAM005000000000000000002 /* OrientationWarningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationWarningView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,22 +113,42 @@
 		5B5144A6277790BB00C332C9 /* SSMUtility */ = {
 			isa = PBXGroup;
 			children = (
+				CAM000000000000000000001 /* Camera */,
 				5B134ADC27784B34008654AF /* OpenCVWrapper */,
 				5B5144A7277790BB00C332C9 /* AppDelegate.swift */,
 				5B5144A9277790BB00C332C9 /* SceneDelegate.swift */,
 				5B5144E327779C5700C332C9 /* Helper.swift */,
 				A1B2C3D4E5F6A7B8C9D0E1F3 /* ImageStorageManager.swift */,
 				5B5144DB277791DB00C332C9 /* PreviewView.swift */,
-				5B5144DD277791EE00C332C9 /* CameraViewController.swift */,
 				5B5144E12777920400C332C9 /* PhotoCaptureDelegate.swift */,
 				A1B2C3D4E5F6A7B8C9D0E1F5 /* GalleryView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E1F7 /* ImageDetailView.swift */,
-				5B5144AD277790BB00C332C9 /* Main.storyboard */,
 				5B5144B0277790BC00C332C9 /* Assets.xcassets */,
 				5B5144B2277790BC00C332C9 /* LaunchScreen.storyboard */,
 				5B5144B5277790BC00C332C9 /* Info.plist */,
 			);
 			path = SSMUtility;
+			sourceTree = "<group>";
+		};
+		CAM000000000000000000001 /* Camera */ = {
+			isa = PBXGroup;
+			children = (
+				CAM000000000000000000002 /* Views */,
+				5B5144DD277791EE00C332C9 /* CameraViewController.swift */,
+				CAM001000000000000000002 /* CameraSessionManager.swift */,
+				CAM002000000000000000002 /* CameraViewModel.swift */,
+				CAM003000000000000000002 /* OrientationManager.swift */,
+			);
+			path = Camera;
+			sourceTree = "<group>";
+		};
+		CAM000000000000000000002 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				CAM004000000000000000002 /* FeatureSelectionView.swift */,
+				CAM005000000000000000002 /* OrientationWarningView.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 		C84BAD0FA7E5E79822A8C92C /* Pods */ = {
@@ -198,7 +226,6 @@
 			files = (
 				5B5144B4277790BC00C332C9 /* LaunchScreen.storyboard in Resources */,
 				5B5144B1277790BC00C332C9 /* Assets.xcassets in Resources */,
-				5B5144AF277790BB00C332C9 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -244,20 +271,17 @@
 				5B466978277880AF00169644 /* OpenCVWrapper.mm in Sources */,
 				5B5144A8277790BB00C332C9 /* AppDelegate.swift in Sources */,
 				5B5144AA277790BB00C332C9 /* SceneDelegate.swift in Sources */,
+				CAM001000000000000000001 /* CameraSessionManager.swift in Sources */,
+				CAM002000000000000000001 /* CameraViewModel.swift in Sources */,
+				CAM003000000000000000001 /* OrientationManager.swift in Sources */,
+				CAM004000000000000000001 /* FeatureSelectionView.swift in Sources */,
+				CAM005000000000000000001 /* OrientationWarningView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		5B5144AD277790BB00C332C9 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				5B5144AE277790BB00C332C9 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		5B5144B2277790BC00C332C9 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -406,13 +430,11 @@
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/SSMUtility";
 				INFOPLIST_FILE = SSMUtility/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Unmask Lab";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Unmask Lab uses the camera to capture photos for facial feature extraction.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Unmask Lab needs permission to export photos from the app gallery to your Photo Library.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -465,13 +487,11 @@
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/SSMUtility";
 				INFOPLIST_FILE = SSMUtility/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Unmask Lab";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Unmask Lab uses the camera to capture photos for facial feature extraction.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Unmask Lab needs permission to export photos from the app gallery to your Photo Library.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
