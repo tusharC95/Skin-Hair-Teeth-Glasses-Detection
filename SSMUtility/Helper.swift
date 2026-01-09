@@ -41,7 +41,7 @@ class Helper: NSObject {
 
     static let sharedInstance = Helper()
     var selectedImage: UIImage?
-    var segmentationImageArray = [UIImage]()
+    var segmentationImages: [String: UIImage] = [:]  // Feature type -> Image
     
     // Feature selection - default to all features enabled
     var selectedFeatures: Set<FacialFeature> = Set(FacialFeature.allCases)

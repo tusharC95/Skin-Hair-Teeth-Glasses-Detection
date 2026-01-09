@@ -7,7 +7,7 @@ The app's primary view controller that presents the camera interface.
 
 import UIKit
 import AVFoundation
-import Photos
+import SwiftUI
 
 class CameraViewController: UIViewController {
     
@@ -16,7 +16,7 @@ class CameraViewController: UIViewController {
     var windowOrientation: UIInterfaceOrientation {
         return view.window?.windowScene?.interfaceOrientation ?? .unknown
     }
-    
+	
     // MARK: - Feature Selection UI
     
     private var featureSelectionView: UIView!
@@ -26,6 +26,10 @@ class CameraViewController: UIViewController {
     // MARK: - Orientation Warning
     
     private var orientationWarningView: UIView?
+    
+    // MARK: - Gallery Button
+    
+    private var galleryButton: UIButton!
 
     // MARK: View Controller Life Cycle
     
@@ -38,9 +42,10 @@ class CameraViewController: UIViewController {
         
         // Set up the video preview view.
         previewView.session = session
-        
+		
         // Set up feature selection UI
         setupFeatureSelectionUI()
+        setupGalleryButton()
         
         // Set up orientation monitoring
         setupOrientationMonitoring()
@@ -92,6 +97,9 @@ class CameraViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        // Refresh gallery badge when returning to this view (after gallery dismiss)
+        updateGalleryBadge()
         
         sessionQueue.async {
             switch self.setupResult {
@@ -466,7 +474,7 @@ class CameraViewController: UIViewController {
         case on
         case off
     }
-        
+    
     private var depthDataDeliveryMode: DepthDataDeliveryMode = .off
     
     // MARK: KVO and Notifications
@@ -627,6 +635,93 @@ class CameraViewController: UIViewController {
         }
     }
     
+    // MARK: - Gallery Button
+    
+    private func setupGalleryButton() {
+        galleryButton = UIButton(type: .system)
+        galleryButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        var config = UIButton.Configuration.filled()
+        // Use larger SF Symbol to match capture icon size
+        let largeConfig = UIImage.SymbolConfiguration(pointSize: 28, weight: .medium)
+        config.image = UIImage(systemName: "photo.stack", withConfiguration: largeConfig)
+        config.cornerStyle = .capsule
+        config.baseBackgroundColor = UIColor.black.withAlphaComponent(0.6)
+        config.baseForegroundColor = .systemYellow
+        config.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12)
+        
+        galleryButton.configuration = config
+        galleryButton.addTarget(self, action: #selector(openGallery), for: .touchUpInside)
+        
+        view.addSubview(galleryButton)
+        
+        // Align with photo button (centered at bottom) and camera button (right side)
+        // Photo button: 60x60, 40px from bottom, centered
+        // Camera button: 60x60, 30px from trailing, aligned with photo button
+        // Gallery button: 60x60, 30px from leading, aligned with photo button
+        NSLayoutConstraint.activate([
+            galleryButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 30),
+            galleryButton.centerYAnchor.constraint(equalTo: photoButton.centerYAnchor),
+            galleryButton.widthAnchor.constraint(equalToConstant: 60),
+            galleryButton.heightAnchor.constraint(equalToConstant: 60)
+        ])
+        
+        // Show image count badge
+        updateGalleryBadge()
+    }
+    
+    private func updateGalleryBadge() {
+        let count = ImageStorageManager.shared.getImageCount()
+        if count > 0 {
+            // Add or update badge
+            let badgeTag = 999
+            if let existingBadge = galleryButton.viewWithTag(badgeTag) {
+                if let label = existingBadge.subviews.first as? UILabel {
+                    label.text = count > 99 ? "99+" : "\(count)"
+                }
+            } else {
+                let badgeView = UIView()
+                badgeView.tag = badgeTag
+                badgeView.backgroundColor = .systemYellow
+                badgeView.translatesAutoresizingMaskIntoConstraints = false
+                badgeView.layer.cornerRadius = 10
+                
+                let badgeLabel = UILabel()
+                badgeLabel.text = count > 99 ? "99+" : "\(count)"
+                badgeLabel.font = .systemFont(ofSize: 10, weight: .bold)
+                badgeLabel.textColor = .black
+                badgeLabel.translatesAutoresizingMaskIntoConstraints = false
+                
+                badgeView.addSubview(badgeLabel)
+                galleryButton.addSubview(badgeView)
+                
+                NSLayoutConstraint.activate([
+                    badgeLabel.centerXAnchor.constraint(equalTo: badgeView.centerXAnchor),
+                    badgeLabel.centerYAnchor.constraint(equalTo: badgeView.centerYAnchor),
+                    
+                    badgeView.topAnchor.constraint(equalTo: galleryButton.topAnchor, constant: -4),
+                    badgeView.trailingAnchor.constraint(equalTo: galleryButton.trailingAnchor, constant: 4),
+                    badgeView.widthAnchor.constraint(greaterThanOrEqualToConstant: 20),
+                    badgeView.heightAnchor.constraint(equalToConstant: 20)
+                ])
+                
+                badgeLabel.setContentHuggingPriority(.required, for: .horizontal)
+            }
+        } else {
+            // Remove badge if no images
+            if let badge = galleryButton.viewWithTag(999) {
+                badge.removeFromSuperview()
+            }
+        }
+    }
+    
+    @objc private func openGallery() {
+        let galleryView = GalleryView()
+        let hostingController = UIHostingController(rootView: galleryView)
+        hostingController.modalPresentationStyle = .fullScreen
+        present(hostingController, animated: true)
+    }
+    
     // MARK: - Orientation Monitoring
     
     private func setupOrientationMonitoring() {
@@ -751,6 +846,9 @@ class CameraViewController: UIViewController {
     // MARK: - Photo Saved Alert
     
     private func showPhotoSavedAlert(savedCount: Int, error: Error?) {
+        // Update gallery badge
+        updateGalleryBadge()
+        
         let alert: UIAlertController
         
         if let error = error {
@@ -767,9 +865,9 @@ class CameraViewController: UIViewController {
             let message: String
             
             if Helper.sharedInstance.selectedFeatures.isEmpty {
-                message = "Photo saved to your library."
+                message = "\(savedCount) photo saved to gallery."
             } else {
-                message = "Photo and extracted features (\(featureNames)) saved to your library."
+                message = "\(savedCount) photos saved: Original + \(featureNames)"
             }
             
             alert = UIAlertController(
@@ -777,7 +875,12 @@ class CameraViewController: UIViewController {
                 message: message,
                 preferredStyle: .alert
             )
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            
+            // Add action to view in gallery
+            alert.addAction(UIAlertAction(title: "View Gallery", style: .default) { [weak self] _ in
+                self?.openGallery()
+            })
+            alert.addAction(UIAlertAction(title: "OK", style: .cancel))
         }
         
         present(alert, animated: true)

@@ -18,6 +18,9 @@
 		5B5144DE277791EE00C332C9 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B5144DD277791EE00C332C9 /* CameraViewController.swift */; };
 		5B5144E22777920400C332C9 /* PhotoCaptureDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B5144E12777920400C332C9 /* PhotoCaptureDelegate.swift */; };
 		5B5144E427779C5700C332C9 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B5144E327779C5700C332C9 /* Helper.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* ImageStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F3 /* ImageStorageManager.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E1F4 /* GalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F5 /* GalleryView.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E1F6 /* ImageDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F7 /* ImageDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +43,9 @@
 		5B5144DD277791EE00C332C9 /* CameraViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
 		5B5144E12777920400C332C9 /* PhotoCaptureDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoCaptureDelegate.swift; sourceTree = "<group>"; };
 		5B5144E327779C5700C332C9 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E1F3 /* ImageStorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageStorageManager.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E1F5 /* GalleryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E1F7 /* ImageDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDetailView.swift; sourceTree = "<group>"; };
 		88F9604C9F3CE7D1187CDABE /* Pods-SSMUtility.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SSMUtility.release.xcconfig"; path = "Target Support Files/Pods-SSMUtility/Pods-SSMUtility.release.xcconfig"; sourceTree = "<group>"; };
 		BD309CE0C621B5F6EC0D554F /* Pods-SSMUtility.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SSMUtility.debug.xcconfig"; path = "Target Support Files/Pods-SSMUtility/Pods-SSMUtility.debug.xcconfig"; sourceTree = "<group>"; };
 		E10D7151FC042F59726E4357 /* Pods_SSMUtility.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SSMUtility.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -103,9 +109,12 @@
 				5B5144A7277790BB00C332C9 /* AppDelegate.swift */,
 				5B5144A9277790BB00C332C9 /* SceneDelegate.swift */,
 				5B5144E327779C5700C332C9 /* Helper.swift */,
+				A1B2C3D4E5F6A7B8C9D0E1F3 /* ImageStorageManager.swift */,
 				5B5144DB277791DB00C332C9 /* PreviewView.swift */,
 				5B5144DD277791EE00C332C9 /* CameraViewController.swift */,
 				5B5144E12777920400C332C9 /* PhotoCaptureDelegate.swift */,
+				A1B2C3D4E5F6A7B8C9D0E1F5 /* GalleryView.swift */,
+				A1B2C3D4E5F6A7B8C9D0E1F7 /* ImageDetailView.swift */,
 				5B5144AD277790BB00C332C9 /* Main.storyboard */,
 				5B5144B0277790BC00C332C9 /* Assets.xcassets */,
 				5B5144B2277790BC00C332C9 /* LaunchScreen.storyboard */,
@@ -227,8 +236,11 @@
 			files = (
 				5B5144E22777920400C332C9 /* PhotoCaptureDelegate.swift in Sources */,
 				5B5144E427779C5700C332C9 /* Helper.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* ImageStorageManager.swift in Sources */,
 				5B5144DE277791EE00C332C9 /* CameraViewController.swift in Sources */,
 				5B5144DC277791DB00C332C9 /* PreviewView.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E1F4 /* GalleryView.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E1F6 /* ImageDetailView.swift in Sources */,
 				5B466978277880AF00169644 /* OpenCVWrapper.mm in Sources */,
 				5B5144A8277790BB00C332C9 /* AppDelegate.swift in Sources */,
 				5B5144AA277790BB00C332C9 /* SceneDelegate.swift in Sources */,
@@ -396,7 +408,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Unmask Lab";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Unmask Lab uses the camera to capture photos for facial feature extraction.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Unmask Lab saves captured photos and extracted facial features (skin, hair, teeth, glasses) to your photo library.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Unmask Lab needs permission to export photos from the app gallery to your Photo Library.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -455,7 +467,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Unmask Lab";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Unmask Lab uses the camera to capture photos for facial feature extraction.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Unmask Lab saves captured photos and extracted facial features (skin, hair, teeth, glasses) to your photo library.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Unmask Lab needs permission to export photos from the app gallery to your Photo Library.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;

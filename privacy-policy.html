@@ -143,7 +143,7 @@
         <p>To provide our facial feature extraction functionality, the App requests access to the following device features:</p>
         <ul>
             <li><strong>Camera:</strong> Required to capture photos for facial feature detection and extraction.</li>
-            <li><strong>Photo Library:</strong> Required to save the original photos and extracted facial feature images (skin, hair, teeth, glasses) to your device.</li>
+            <li><strong>Photo Library (Optional):</strong> Only required if you choose to export photos from the app's gallery to your device's Photo Library. All captured photos are stored securely within the app's private storage by default.</li>
         </ul>
         
         <h2>2. Facial Feature Processing</h2>
@@ -160,12 +160,14 @@
         </div>
         
         <h2>3. Data Storage</h2>
-        <p>All photos and extracted facial feature images are saved exclusively to your device's Photo Library. We do not:</p>
+        <p>All photos and extracted facial feature images are saved within the app's private sandboxed storage on your device. This means:</p>
         <ul>
-            <li>Upload any images to external servers</li>
-            <li>Store any data in cloud services</li>
-            <li>Create backups of your photos on our systems</li>
-            <li>Access your existing photos (we only save new photos you capture)</li>
+            <li>Photos are stored securely within the app and cannot be accessed by other apps</li>
+            <li>You can optionally export photos to your Photo Library for sharing</li>
+            <li>We do not upload any images to external servers</li>
+            <li>We do not store any data in cloud services</li>
+            <li>We do not create backups of your photos on our systems</li>
+            <li>Uninstalling the app will delete all photos stored within the app</li>
         </ul>
         
         <h2>4. Data Sharing</h2>
@@ -175,14 +177,15 @@
         <p>Unmask Lab does not integrate with any third-party analytics, advertising, or tracking services. The App operates completely offline after installation.</p>
         
         <h2>6. Data Retention</h2>
-        <p>Since we do not collect or store any of your data, there is no data retention policy required on our end. Photos saved to your Photo Library are managed entirely by you through the iOS Photos app.</p>
+        <p>Photos are stored within the app until you delete them through the app's gallery. Uninstalling the app will permanently delete all photos stored within the app. Photos you export to your Photo Library will remain there until you delete them separately.</p>
         
         <h2>7. Your Rights and Choices</h2>
         <p>You have complete control over your data:</p>
         <ul>
-            <li><strong>Permissions:</strong> You can grant or revoke camera, photo library, location, and microphone permissions at any time through iOS Settings.</li>
-            <li><strong>Photos:</strong> You can delete any photos saved by the App through the iOS Photos app.</li>
-            <li><strong>App Removal:</strong> Uninstalling the App removes all app-related data from your device (photos you've saved to your library will remain unless you delete them separately).</li>
+            <li><strong>Permissions:</strong> You can grant or revoke camera and photo library permissions at any time through iOS Settings.</li>
+            <li><strong>In-App Photos:</strong> You can view, export, and delete any photos through the app's built-in gallery.</li>
+            <li><strong>Export:</strong> You can export photos to your device's Photo Library for sharing or backup.</li>
+            <li><strong>App Removal:</strong> Uninstalling the App permanently deletes all photos stored within the app. Photos exported to your Photo Library will remain.</li>
         </ul>
         
         <h2>8. Children's Privacy</h2>

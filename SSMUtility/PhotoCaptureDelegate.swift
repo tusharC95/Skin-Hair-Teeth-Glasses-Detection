@@ -6,7 +6,6 @@
  */
 
 import AVFoundation
-import Photos
 import UIKit
 import Accelerate
 
@@ -45,19 +44,8 @@ class PhotoCaptureProcessor: NSObject {
     }
     
     private func didFinish() {
-        
         completionHandler(self)
     }
-    
-    func getFaceFeatures(inputImage: UIImage, ssmImage: UIImage?) {
-        
-        if let validSkinSegImage = ssmImage {
-            let maskImage = wrapper.getRegionOfInterestFace(validSkinSegImage, inputImage)
-            UIImageWriteToSavedPhotosAlbum(maskImage, nil, nil, nil)
-            
-        }
-    }
-    
 }
 
 extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
@@ -107,17 +95,22 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
         }
         
         var imageOption: CIImageOption!
+        var featureTypeName: String = ""
         
         // Switch on the AVSemanticSegmentationMatteType value.
         switch ssmType {
         case .hair:
             imageOption = .auxiliarySemanticSegmentationHairMatte
+            featureTypeName = "Hair"
         case .skin:
             imageOption = .auxiliarySemanticSegmentationSkinMatte
+            featureTypeName = "Skin"
         case .teeth:
             imageOption = .auxiliarySemanticSegmentationTeethMatte
+            featureTypeName = "Teeth"
         case .glasses:
             imageOption = .auxiliarySemanticSegmentationGlassesMatte
+            featureTypeName = "Glasses"
         default:
             print("This semantic segmentation type is not supported!")
             return
@@ -141,7 +134,8 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
             let flipped = ciimage.transformed(by: CGAffineTransform(scaleX: -1, y: 1))
             skinDetectedOutputImage = self.convert(cmage: flipped)
             
-            Helper.sharedInstance.segmentationImageArray.append(skinDetectedOutputImage)
+            // Store with feature type name for correct labeling
+            Helper.sharedInstance.segmentationImages[featureTypeName] = skinDetectedOutputImage
         }
     }
     
@@ -189,44 +183,38 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
         }
         
         
+        // Save images to sandboxed storage
+        let captureDate = Date()
+        var savedCount = 0
+        
+        // Save original photo
         if let validInputImage = Helper.sharedInstance.selectedImage {
-            for smmImage in Helper.sharedInstance.segmentationImageArray {
+            if ImageStorageManager.shared.saveImage(validInputImage, featureType: nil, captureDate: captureDate) != nil {
+                savedCount += 1
+            }
+            
+            // Process and save feature images using the dictionary (correct feature mapping)
+            for (featureType, smmImage) in Helper.sharedInstance.segmentationImages {
                 if let validImage = smmImage.resizeImageUsingVImage(size: CGSize(width: validInputImage.size.width, height: validInputImage.size.height)) {
-                    getFaceFeatures(inputImage: validInputImage, ssmImage: validImage)
-                }
-            }
-        }
-        
-        Helper.sharedInstance.segmentationImageArray.removeAll()
-        
-        // Count how many images will be saved (1 original + extracted features)
-        let featureCount = Helper.sharedInstance.selectedFeatures.count
-        let totalSavedCount = 1 + featureCount // Original photo + feature extractions
-        
-        PHPhotoLibrary.requestAuthorization { status in
-            if status == .authorized {
-                PHPhotoLibrary.shared().performChanges({
-                    let options = PHAssetResourceCreationOptions()
-                    let creationRequest = PHAssetCreationRequest.forAsset()
-                    options.uniformTypeIdentifier = self.requestedPhotoSettings.processedFileType.map { $0.rawValue }
-                    creationRequest.addResource(with: .photo, data: photoData, options: options)
-                    
-                }, completionHandler: { success, error in
-                    if let error = error {
-                        print("Error occurred while saving photo to photo library: \(error)")
-                        self.photoSavedHandler(0, error)
-                    } else {
-                        self.photoSavedHandler(totalSavedCount, nil)
+                    // Extract the feature and save with correct label
+                    let maskImage = wrapper.getRegionOfInterestFace(validImage, validInputImage)
+                    if ImageStorageManager.shared.saveImage(maskImage, featureType: featureType, captureDate: captureDate) != nil {
+                        savedCount += 1
                     }
-                    
-                    self.didFinish()
                 }
-                )
-            } else {
-                self.photoSavedHandler(0, NSError(domain: "Unmask Lab", code: -1, userInfo: [NSLocalizedDescriptionKey: "Photo Library access denied"]))
-                self.didFinish()
             }
         }
+        
+        Helper.sharedInstance.segmentationImages.removeAll()
+        
+        // Call completion handler
+        if savedCount > 0 {
+            self.photoSavedHandler(savedCount, nil)
+        } else {
+            self.photoSavedHandler(0, NSError(domain: "Unmask Lab", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to save images"]))
+        }
+        
+        self.didFinish()
     }
     
     func sFunc_imageFixOrientation(img: UIImage) -> UIImage {
