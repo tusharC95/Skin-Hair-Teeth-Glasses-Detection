@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+xcuserdata/
+
+# CocoaPods
+Pods/
+
+# Code Injection
+iOSInjectionProject/
+
+# Accio
+Dependencies/
+.accio/
+
+# Archives
+*.ipa
+*.dSYM.zip
+*.dSYM
+
