@@ -26,6 +26,7 @@
 		CAM004000000000000000001 /* FeatureSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAM004000000000000000002 /* FeatureSelectionView.swift */; };
 		CAM005000000000000000001 /* OrientationWarningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAM005000000000000000002 /* OrientationWarningView.swift */; };
 		GAL001000000000000000001 /* GalleryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = GAL001000000000000000002 /* GalleryViewModel.swift */; };
+		GAL002000000000000000001 /* ImageDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = GAL002000000000000000002 /* ImageDetailViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -60,6 +61,7 @@
 		CAM004000000000000000002 /* FeatureSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureSelectionView.swift; sourceTree = "<group>"; };
 		CAM005000000000000000002 /* OrientationWarningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationWarningView.swift; sourceTree = "<group>"; };
 		GAL001000000000000000002 /* GalleryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryViewModel.swift; sourceTree = "<group>"; };
+		GAL002000000000000000002 /* ImageDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDetailViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -124,7 +126,6 @@
 				A1B2C3D4E5F6A7B8C9D0E1F3 /* ImageStorageManager.swift */,
 				5B5144DB277791DB00C332C9 /* PreviewView.swift */,
 				5B5144E12777920400C332C9 /* PhotoCaptureDelegate.swift */,
-				A1B2C3D4E5F6A7B8C9D0E1F7 /* ImageDetailView.swift */,
 				5B5144B0277790BC00C332C9 /* Assets.xcassets */,
 				5B5144B2277790BC00C332C9 /* LaunchScreen.storyboard */,
 				5B5144B5277790BC00C332C9 /* Info.plist */,
@@ -158,6 +159,8 @@
 			children = (
 				A1B2C3D4E5F6A7B8C9D0E1F5 /* GalleryView.swift */,
 				GAL001000000000000000002 /* GalleryViewModel.swift */,
+				A1B2C3D4E5F6A7B8C9D0E1F7 /* ImageDetailView.swift */,
+				GAL002000000000000000002 /* ImageDetailViewModel.swift */,
 			);
 			path = Gallery;
 			sourceTree = "<group>";
@@ -288,6 +291,7 @@
 				CAM004000000000000000001 /* FeatureSelectionView.swift in Sources */,
 				CAM005000000000000000001 /* OrientationWarningView.swift in Sources */,
 				GAL001000000000000000001 /* GalleryViewModel.swift in Sources */,
+				GAL002000000000000000001 /* ImageDetailViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
