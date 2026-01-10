@@ -80,7 +80,6 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
         
         // Check if this feature type is selected by the user
         guard isFeatureSelected(ssmType) else {
-            print("Skipping \(ssmType) - not selected by user")
             return
         }
         
@@ -112,7 +111,7 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
             imageOption = .auxiliarySemanticSegmentationGlassesMatte
             featureTypeName = "Glasses"
         default:
-            print("This semantic segmentation type is not supported!")
+            // Unsupported segmentation type - skip silently
             return
         }
         
@@ -150,7 +149,7 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
         photoProcessingHandler(false)
         
         if let error = error {
-            print("Error capturing photo: \(error)")
+            photoSavedHandler(0, error)
             return
         } else {
             photoData = photo.fileDataRepresentation()
@@ -171,13 +170,14 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
     /// - Tag: DidFinishCapture
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings, error: Error?) {
         if let error = error {
-            print("Error capturing photo: \(error)")
+            photoSavedHandler(0, error)
             didFinish()
             return
         }
         
         guard let photoData = photoData else {
-            print("No photo data resource")
+            let noDataError = NSError(domain: "Unmask Lab", code: -2, userInfo: [NSLocalizedDescriptionKey: "No photo data available"])
+            photoSavedHandler(0, noDataError)
             didFinish()
             return
         }

@@ -86,6 +86,11 @@ struct GalleryView: View {
         } message: {
             Text("This action cannot be undone.")
         }
+        .alert("Error", isPresented: $viewModel.showingError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(viewModel.errorMessage ?? "An error occurred")
+        }
     }
     
     // MARK: - Computed Properties

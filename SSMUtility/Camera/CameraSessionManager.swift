@@ -111,7 +111,6 @@ class CameraSessionManager {
         // Add video input
         do {
             guard let videoDevice = selectVideoDevice() else {
-                print("Default video device is unavailable.")
                 setupResult = .configurationFailed
                 session.commitConfiguration()
                 DispatchQueue.main.async {
@@ -126,15 +125,19 @@ class CameraSessionManager {
                 session.addInput(videoDeviceInput)
                 self.videoDeviceInput = videoDeviceInput
             } else {
-                print("Couldn't add video device input to the session.")
                 setupResult = .configurationFailed
                 session.commitConfiguration()
+                DispatchQueue.main.async {
+                    self.delegate?.sessionManager(self, didFailWithError: .configurationFailed)
+                }
                 return
             }
         } catch {
-            print("Couldn't create video device input: \(error)")
             setupResult = .configurationFailed
             session.commitConfiguration()
+            DispatchQueue.main.async {
+                self.delegate?.sessionManager(self, didFailWithError: .configurationFailed)
+            }
             return
         }
         
@@ -143,9 +146,11 @@ class CameraSessionManager {
             session.addOutput(photoOutput)
             configurePhotoOutput()
         } else {
-            print("Could not add photo output to the session")
             setupResult = .configurationFailed
             session.commitConfiguration()
+            DispatchQueue.main.async {
+                self.delegate?.sessionManager(self, didFailWithError: .configurationFailed)
+            }
             return
         }
         
@@ -263,8 +268,10 @@ class CameraSessionManager {
                 
                 DispatchQueue.main.async { completion(true) }
             } catch {
-                print("Error switching camera: \(error)")
-                DispatchQueue.main.async { completion(false) }
+                DispatchQueue.main.async {
+                    self.delegate?.sessionManager(self, didFailWithError: .configurationFailed)
+                    completion(false)
+                }
             }
         }
     }

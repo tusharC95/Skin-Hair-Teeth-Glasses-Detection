@@ -12,6 +12,11 @@ import UIKit
 
 class GalleryViewModel: ObservableObject {
     
+    // MARK: - Error State
+    
+    @Published var errorMessage: String?
+    @Published var showingError = false
+    
     // MARK: - Published State
     
     @Published private(set) var imageGroups: [ImageGroup] = []
@@ -186,11 +191,20 @@ class GalleryViewModel: ObservableObject {
         let allImages = imageGroups.flatMap { $0.images }
         let imagesToDelete = allImages.filter { selectedImages.contains($0.id) }
         
-        let deletedCount = ImageStorageManager.shared.deleteImages(imagesToDelete)
+        let result = ImageStorageManager.shared.deleteImages(imagesToDelete)
+        
+        if result.failed > 0 {
+            if let error = ImageStorageManager.shared.lastError {
+                errorMessage = error.errorDescription
+            } else {
+                errorMessage = "Failed to delete \(result.failed) photo(s)"
+            }
+            showingError = true
+        }
         
         exitSelectionMode()
         loadImages()
         
-        return deletedCount
+        return result.deleted
     }
 }

@@ -48,12 +48,18 @@ struct ImageDetailView: View {
         }
         .confirmationDialog("Delete Photo?", isPresented: $viewModel.showingDeleteConfirmation, titleVisibility: .visible) {
             Button("Delete", role: .destructive) {
-                viewModel.deleteImage()
-                dismiss()
+                if viewModel.deleteImage() {
+                    dismiss()
+                }
             }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This photo will be permanently deleted from the app.")
+        }
+        .alert("Error", isPresented: $viewModel.showingError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(viewModel.errorMessage)
         }
         .alert(viewModel.exportSuccess ? "Saved!" : "Error", isPresented: $viewModel.showingExportAlert) {
             Button("OK", role: .cancel) {}

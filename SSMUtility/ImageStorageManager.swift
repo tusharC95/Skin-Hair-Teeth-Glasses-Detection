@@ -8,6 +8,34 @@
 import Foundation
 import UIKit
 
+// MARK: - Storage Errors
+
+enum ImageStorageError: LocalizedError {
+    case directoryCreationFailed
+    case imageConversionFailed
+    case saveFailed(underlying: Error)
+    case deleteFailed(underlying: Error)
+    case metadataDecodingFailed
+    case imageNotFound
+    
+    var errorDescription: String? {
+        switch self {
+        case .directoryCreationFailed:
+            return "Could not create storage directory"
+        case .imageConversionFailed:
+            return "Could not process image for saving"
+        case .saveFailed(let error):
+            return "Failed to save image: \(error.localizedDescription)"
+        case .deleteFailed(let error):
+            return "Failed to delete image: \(error.localizedDescription)"
+        case .metadataDecodingFailed:
+            return "Could not read saved images"
+        case .imageNotFound:
+            return "Image file not found"
+        }
+    }
+}
+
 /// Represents a saved image with metadata
 struct SavedImage: Identifiable, Codable {
     let id: UUID
@@ -64,12 +92,14 @@ class ImageStorageManager {
         if !fileManager.fileExists(atPath: imagesDirectory.path) {
             do {
                 try fileManager.createDirectory(at: imagesDirectory, withIntermediateDirectories: true)
-                print("Created images directory at: \(imagesDirectory.path)")
             } catch {
-                print("Error creating images directory: \(error)")
+                lastError = .directoryCreationFailed
             }
         }
     }
+    
+    /// Last error that occurred during an operation
+    private(set) var lastError: ImageStorageError?
     
     // MARK: - Save Images
     
@@ -81,13 +111,15 @@ class ImageStorageManager {
     /// - Returns: The saved image metadata, or nil if failed
     @discardableResult
     func saveImage(_ image: UIImage, featureType: String? = nil, captureDate: Date = Date()) -> SavedImage? {
+        lastError = nil
+        
         let id = UUID()
         let filename = "\(id.uuidString).jpg"
         let fileURL = imagesDirectory.appendingPathComponent(filename)
         
         // Convert to JPEG data
         guard let imageData = image.jpegData(compressionQuality: 0.9) else {
-            print("Error: Could not convert image to JPEG")
+            lastError = .imageConversionFailed
             return nil
         }
         
@@ -95,7 +127,7 @@ class ImageStorageManager {
         do {
             try imageData.write(to: fileURL)
         } catch {
-            print("Error saving image: \(error)")
+            lastError = .saveFailed(underlying: error)
             return nil
         }
         
@@ -112,7 +144,6 @@ class ImageStorageManager {
         allImages.append(savedImage)
         saveAllImageMetadata(allImages)
         
-        print("Saved image: \(filename) with feature: \(featureType ?? "Original")")
         return savedImage
     }
     
@@ -130,7 +161,7 @@ class ImageStorageManager {
     /// Load all saved images metadata
     func loadAllImageMetadata() -> [SavedImage] {
         guard let data = try? Data(contentsOf: metadataURL) else {
-            print("No metadata file found or unable to read")
+            // No metadata file yet - this is normal for first launch
             return []
         }
         
@@ -139,10 +170,9 @@ class ImageStorageManager {
         
         do {
             let images = try decoder.decode([SavedImage].self, from: data)
-            print("Loaded \(images.count) images from metadata")
             return images
         } catch {
-            print("Error decoding image metadata: \(error)")
+            lastError = .metadataDecodingFailed
             return []
         }
     }
@@ -184,6 +214,7 @@ class ImageStorageManager {
     
     /// Delete a single image
     func deleteImage(_ savedImage: SavedImage) -> Bool {
+        lastError = nil
         let fileURL = imagesDirectory.appendingPathComponent(savedImage.filename)
         
         do {
@@ -196,14 +227,17 @@ class ImageStorageManager {
             
             return true
         } catch {
-            print("Error deleting image: \(error)")
+            lastError = .deleteFailed(underlying: error)
             return false
         }
     }
     
     /// Delete multiple images at once
-    func deleteImages(_ imagesToDelete: [SavedImage]) -> Int {
+    /// - Returns: Tuple with (deletedCount, failedCount)
+    func deleteImages(_ imagesToDelete: [SavedImage]) -> (deleted: Int, failed: Int) {
+        lastError = nil
         var deletedCount = 0
+        var failedCount = 0
         var allImages = loadAllImageMetadata()
         let idsToDelete = Set(imagesToDelete.map { $0.id })
         
@@ -213,7 +247,8 @@ class ImageStorageManager {
                 try fileManager.removeItem(at: fileURL)
                 deletedCount += 1
             } catch {
-                print("Error deleting image \(image.filename): \(error)")
+                failedCount += 1
+                lastError = .deleteFailed(underlying: error)
             }
         }
         
@@ -221,8 +256,7 @@ class ImageStorageManager {
         allImages.removeAll { idsToDelete.contains($0.id) }
         saveAllImageMetadata(allImages)
         
-        print("Deleted \(deletedCount) of \(imagesToDelete.count) images")
-        return deletedCount
+        return (deleted: deletedCount, failed: failedCount)
     }
     
     // MARK: - Metadata Persistence
@@ -232,14 +266,14 @@ class ImageStorageManager {
         encoder.dateEncodingStrategy = .iso8601
         
         guard let data = try? encoder.encode(images) else {
-            print("Error encoding image metadata")
+            lastError = .metadataDecodingFailed
             return
         }
         
         do {
             try data.write(to: metadataURL)
         } catch {
-            print("Error saving metadata: \(error)")
+            lastError = .saveFailed(underlying: error)
         }
     }
     

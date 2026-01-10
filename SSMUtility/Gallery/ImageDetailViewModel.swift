@@ -20,8 +20,10 @@ class ImageDetailViewModel: ObservableObject {
     @Published var showingDeleteConfirmation = false
     @Published var showingExportAlert = false
     @Published var showingShareSheet = false
+    @Published var showingError = false
     @Published private(set) var exportSuccess = false
     @Published private(set) var exportMessage = ""
+    @Published private(set) var errorMessage = ""
     
     // MARK: - Properties
     
@@ -69,9 +71,19 @@ class ImageDetailViewModel: ObservableObject {
     
     // MARK: - Actions
     
-    func deleteImage() {
-        _ = ImageStorageManager.shared.deleteImage(savedImage)
-        onDelete?()
+    func deleteImage() -> Bool {
+        let success = ImageStorageManager.shared.deleteImage(savedImage)
+        if success {
+            onDelete?()
+        } else {
+            if let error = ImageStorageManager.shared.lastError {
+                errorMessage = error.errorDescription ?? "Failed to delete image"
+            } else {
+                errorMessage = "Failed to delete image"
+            }
+            showingError = true
+        }
+        return success
     }
     
     func exportToPhotos() {
