@@ -225,17 +225,6 @@ class ImageStorageManager {
         return deletedCount
     }
     
-    /// Delete all images
-    func deleteAllImages() {
-        do {
-            try fileManager.removeItem(at: imagesDirectory)
-            createImagesDirectoryIfNeeded()
-            print("Deleted all images")
-        } catch {
-            print("Error deleting all images: \(error)")
-        }
-    }
-    
     // MARK: - Metadata Persistence
     
     private func saveAllImageMetadata(_ images: [SavedImage]) {
@@ -265,26 +254,6 @@ class ImageStorageManager {
         
         UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
         completion(true, nil)
-    }
-    
-    // MARK: - Storage Info
-    
-    /// Get total storage used by saved images
-    func getStorageUsed() -> String {
-        var totalSize: Int64 = 0
-        
-        if let enumerator = fileManager.enumerator(at: imagesDirectory, includingPropertiesForKeys: [.fileSizeKey]) {
-            while let fileURL = enumerator.nextObject() as? URL {
-                if let fileSize = try? fileURL.resourceValues(forKeys: [.fileSizeKey]).fileSize {
-                    totalSize += Int64(fileSize)
-                }
-            }
-        }
-        
-        let formatter = ByteCountFormatter()
-        formatter.allowedUnits = [.useKB, .useMB, .useGB]
-        formatter.countStyle = .file
-        return formatter.string(fromByteCount: totalSize)
     }
     
     /// Get total number of saved images

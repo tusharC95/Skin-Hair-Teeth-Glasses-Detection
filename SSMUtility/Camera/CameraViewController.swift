@@ -23,7 +23,7 @@ class CameraViewController: UIViewController {
     private var photoButton: UIButton!
     private var cameraButton: UIButton!
     private var galleryButton: UIButton!
-    private var featureSelectionView: FeatureSelectionView!
+    private var featureSelectionView: FeatureSelectionHostingView!
     private var orientationWarningView: OrientationWarningView?
     private var spinner: UIActivityIndicatorView!
     
@@ -141,9 +141,21 @@ class CameraViewController: UIViewController {
     }
     
     private func setupFeatureSelectionView() {
-        featureSelectionView = FeatureSelectionView()
+        featureSelectionView = FeatureSelectionHostingView()
         featureSelectionView.translatesAutoresizingMaskIntoConstraints = false
-        featureSelectionView.delegate = self
+        
+        featureSelectionView.onFeatureSelected = { [weak self] feature in
+            guard let self = self else { return }
+            self.viewModel.toggleFeature(feature)
+            self.updateFeatureSelectionState()
+        }
+        
+        featureSelectionView.onAllSelected = { [weak self] in
+            guard let self = self else { return }
+            self.viewModel.selectAllFeatures()
+            self.updateFeatureSelectionState()
+        }
+        
         view.addSubview(featureSelectionView)
         
         updateFeatureSelectionState()
@@ -423,19 +435,5 @@ class CameraViewController: UIViewController {
             UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
         })
         present(alert, animated: true)
-    }
-}
-
-// MARK: - FeatureSelectionViewDelegate
-
-extension CameraViewController: FeatureSelectionViewDelegate {
-    func featureSelectionView(_ view: FeatureSelectionView, didSelectFeature feature: FacialFeature) {
-        viewModel.toggleFeature(feature)
-        updateFeatureSelectionState()
-    }
-    
-    func featureSelectionViewDidSelectAll(_ view: FeatureSelectionView) {
-        viewModel.selectAllFeatures()
-        updateFeatureSelectionState()
     }
 }

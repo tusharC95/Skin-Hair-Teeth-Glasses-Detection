@@ -50,10 +50,6 @@ class Helper: NSObject {
         return selectedFeatures.map { $0.matteType }
     }
     
-    func isFeatureSelected(_ feature: FacialFeature) -> Bool {
-        return selectedFeatures.contains(feature)
-    }
-    
     func toggleFeature(_ feature: FacialFeature) {
         if selectedFeatures.contains(feature) {
             selectedFeatures.remove(feature)

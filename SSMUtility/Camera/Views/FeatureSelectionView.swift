@@ -2,151 +2,235 @@
  FeatureSelectionView.swift
  SSMUtility
 
- UIKit view for selecting facial features (Skin, Hair, Teeth, Glasses).
+ SwiftUI view for selecting facial features (Skin, Hair, Teeth, Glasses).
+ Uses iOS 26+ Liquid Glass design.
 */
 
+import SwiftUI
 import UIKit
+import AVFoundation
 
-// MARK: - Protocol
+// MARK: - FacialFeature Extension for SwiftUI
 
-protocol FeatureSelectionViewDelegate: AnyObject {
-    func featureSelectionView(_ view: FeatureSelectionView, didSelectFeature feature: FacialFeature)
-    func featureSelectionViewDidSelectAll(_ view: FeatureSelectionView)
+extension FacialFeature: Identifiable {
+    var id: String { rawValue }
 }
 
 // MARK: - FeatureSelectionView
 
-class FeatureSelectionView: UIView {
+struct FeatureSelectionView: View {
+    @Binding var selectedFeatures: Set<FacialFeature>
+    @Binding var allSelected: Bool
     
-    // MARK: - Properties
+    var onFeatureSelected: ((FacialFeature) -> Void)?
+    var onAllSelected: (() -> Void)?
     
-    weak var delegate: FeatureSelectionViewDelegate?
-    
-    private var featureButtons: [FacialFeature: UIButton] = [:]
-    private var allButton: UIButton!
-    private let stackView = UIStackView()
-    
-    // MARK: - Initialization
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupView()
-    }
-    
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupView()
-    }
-    
-    // MARK: - Setup
-    
-    private func setupView() {
-        backgroundColor = UIColor.black.withAlphaComponent(0.6)
-        layer.cornerRadius = 16
-        
-        setupStackView()
-        setupAllButton()
-        setupFeatureButtons()
-        setupConstraints()
-    }
-    
-    private func setupStackView() {
-        stackView.axis = .horizontal
-        stackView.distribution = .fillEqually
-        stackView.spacing = 8
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(stackView)
-    }
-    
-    private func setupAllButton() {
-        allButton = createButton(title: "All", icon: "checkmark.circle.fill")
-        allButton.addTarget(self, action: #selector(allButtonTapped), for: .touchUpInside)
-        stackView.addArrangedSubview(allButton)
-    }
-    
-    private func setupFeatureButtons() {
-        for feature in FacialFeature.allCases {
-            let button = createButton(title: feature.rawValue, icon: feature.icon)
-            button.tag = FacialFeature.allCases.firstIndex(of: feature)!
-            button.addTarget(self, action: #selector(featureButtonTapped(_:)), for: .touchUpInside)
-            featureButtons[feature] = button
-            stackView.addArrangedSubview(button)
+    var body: some View {
+        // iOS 26+: Group glass elements in a container so they can render efficiently
+        // and blend into each other (the "liquid" effect).
+        GlassEffectContainer {
+            selectionStack
+                .padding(12)
         }
     }
-    
-    private func setupConstraints() {
-        NSLayoutConstraint.activate([
-            stackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
-            stackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
-            stackView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
-            stackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8)
-        ])
-    }
-    
-    // MARK: - Button Factory
-    
-    private func createButton(title: String, icon: String) -> UIButton {
-        let button = UIButton(type: .system)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        
-        var config = UIButton.Configuration.filled()
-        config.title = title
-        config.image = UIImage(systemName: icon)
-        config.imagePlacement = .top
-        config.imagePadding = 4
-        config.cornerStyle = .medium
-        config.baseBackgroundColor = UIColor.darkGray
-        config.baseForegroundColor = .white
-        
-        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
-            var outgoing = incoming
-            outgoing.font = UIFont.systemFont(ofSize: 10, weight: .medium)
-            return outgoing
+
+    private var selectionStack: some View {
+        // Match UIKit `UIStackView` (spacing = 8, distribution = .fillEqually)
+        HStack(spacing: 8) {
+            // All Button
+            FeatureButton(
+                title: "All",
+                icon: "checkmark.circle.fill",
+                isSelected: allSelected
+            ) {
+                triggerHapticFeedback()
+                onAllSelected?()
+            }
+
+            // Feature Buttons
+            ForEach(FacialFeature.allCases, id: \.self) { feature in
+                FeatureButton(
+                    title: feature.rawValue,
+                    icon: feature.icon,
+                    isSelected: selectedFeatures.contains(feature)
+                ) {
+                    triggerHapticFeedback()
+                    onFeatureSelected?(feature)
+                }
+            }
         }
-        
-        button.configuration = config
-        return button
-    }
-    
-    // MARK: - Actions
-    
-    @objc private func allButtonTapped() {
-        triggerHapticFeedback()
-        delegate?.featureSelectionViewDidSelectAll(self)
-    }
-    
-    @objc private func featureButtonTapped(_ sender: UIButton) {
-        triggerHapticFeedback()
-        let feature = FacialFeature.allCases[sender.tag]
-        delegate?.featureSelectionView(self, didSelectFeature: feature)
     }
     
     private func triggerHapticFeedback() {
         let generator = UIImpactFeedbackGenerator(style: .light)
         generator.impactOccurred()
     }
+}
+
+// MARK: - FeatureButton with Liquid Glass Effect
+
+struct FeatureButton: View {
+    let title: String
+    let icon: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    /// Tint color based on selection state
+    private var tintColor: Color {
+        isSelected ? Color.yellow.opacity(0.8) : Color.white.opacity(0.3)
+    }
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 20, weight: .medium))
+                Text(title)
+                    .font(.system(size: 10, weight: .semibold))
+            }
+            // Match UIKit filled button: equal width in row, medium corners, compact height.
+            .frame(maxWidth: .infinity, minHeight: 56)
+            .foregroundColor(isSelected ? .black : .white)
+        }
+        .buttonStyle(.plain)
+        .glassEffect(.regular.tint(tintColor).interactive())
+        // Match UIKit `UIButton.Configuration.cornerStyle = .medium`
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+}
+
+// MARK: - UIKit Hosting Wrapper
+
+/// A UIView wrapper for hosting the SwiftUI FeatureSelectionView in UIKit view hierarchies.
+class FeatureSelectionHostingView: UIView {
+    
+    // MARK: - Properties
+    
+    private var hostingController: UIHostingController<FeatureSelectionView>?
+    private var selectedFeatures: Set<FacialFeature> = Set(FacialFeature.allCases)
+    private var allSelected: Bool = true
+    
+    var onFeatureSelected: ((FacialFeature) -> Void)?
+    var onAllSelected: (() -> Void)?
+    
+    // MARK: - Initialization
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupHostingController()
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setupHostingController()
+    }
+    
+    // MARK: - Setup
+    
+    private func setupHostingController() {
+        backgroundColor = .clear
+        
+        let swiftUIView = FeatureSelectionView(
+            selectedFeatures: Binding(
+                get: { [weak self] in self?.selectedFeatures ?? [] },
+                set: { [weak self] in self?.selectedFeatures = $0 }
+            ),
+            allSelected: Binding(
+                get: { [weak self] in self?.allSelected ?? false },
+                set: { [weak self] in self?.allSelected = $0 }
+            ),
+            onFeatureSelected: { [weak self] feature in
+                self?.onFeatureSelected?(feature)
+            },
+            onAllSelected: { [weak self] in
+                self?.onAllSelected?()
+            }
+        )
+        
+        let hostingController = UIHostingController(rootView: swiftUIView)
+        hostingController.view.backgroundColor = .clear
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        
+        addSubview(hostingController.view)
+        
+        NSLayoutConstraint.activate([
+            hostingController.view.leadingAnchor.constraint(equalTo: leadingAnchor),
+            hostingController.view.trailingAnchor.constraint(equalTo: trailingAnchor),
+            hostingController.view.topAnchor.constraint(equalTo: topAnchor),
+            hostingController.view.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
+        
+        self.hostingController = hostingController
+    }
     
     // MARK: - Public Methods
     
     func updateButtonStates(selectedFeatures: Set<FacialFeature>, allSelected: Bool) {
-        updateButtonAppearance(allButton, isSelected: allSelected)
+        self.selectedFeatures = selectedFeatures
+        self.allSelected = allSelected
         
-        for feature in FacialFeature.allCases {
-            if let button = featureButtons[feature] {
-                updateButtonAppearance(button, isSelected: selectedFeatures.contains(feature))
+        // Recreate the SwiftUI view with updated bindings
+        let swiftUIView = FeatureSelectionView(
+            selectedFeatures: Binding(
+                get: { [weak self] in self?.selectedFeatures ?? [] },
+                set: { [weak self] in self?.selectedFeatures = $0 }
+            ),
+            allSelected: Binding(
+                get: { [weak self] in self?.allSelected ?? false },
+                set: { [weak self] in self?.allSelected = $0 }
+            ),
+            onFeatureSelected: { [weak self] feature in
+                self?.onFeatureSelected?(feature)
+            },
+            onAllSelected: { [weak self] in
+                self?.onAllSelected?()
             }
-        }
+        )
+        
+        hostingController?.rootView = swiftUIView
     }
+}
+
+// MARK: - Preview
+
+#Preview {
+    @Previewable @State var selectedFeatures: Set<FacialFeature> = []
+    @Previewable @State var allSelected: Bool = false
     
-    private func updateButtonAppearance(_ button: UIButton, isSelected: Bool) {
-        var config = button.configuration
-        if isSelected {
-            config?.baseBackgroundColor = UIColor.systemYellow
-            config?.baseForegroundColor = .black
-        } else {
-            config?.baseBackgroundColor = UIColor.darkGray.withAlphaComponent(0.8)
-            config?.baseForegroundColor = .white.withAlphaComponent(0.6)
+    ZStack {
+        Color.black
+            .ignoresSafeArea()
+        
+        VStack {
+            Spacer()
+            
+            FeatureSelectionView(
+                selectedFeatures: $selectedFeatures,
+                allSelected: $allSelected,
+                onFeatureSelected: { feature in
+                    withAnimation(.spring(duration: 0.3)) {
+                        if selectedFeatures.contains(feature) {
+                            selectedFeatures.remove(feature)
+                        } else {
+                            selectedFeatures.insert(feature)
+                        }
+                        allSelected = selectedFeatures.count == FacialFeature.allCases.count
+                    }
+                },
+                onAllSelected: {
+                    withAnimation(.spring(duration: 0.3)) {
+                        if allSelected {
+                            allSelected = false
+                            selectedFeatures.removeAll()
+                        } else {
+                            allSelected = true
+                            selectedFeatures = Set(FacialFeature.allCases)
+                        }
+                    }
+                }
+            )
+            .padding(.horizontal, 16)
+            .padding(.bottom, 40)
         }
-        button.configuration = config
     }
 }

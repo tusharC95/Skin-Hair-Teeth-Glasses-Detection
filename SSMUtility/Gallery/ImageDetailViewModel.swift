@@ -46,10 +46,6 @@ class ImageDetailViewModel: ObservableObject {
         savedImage.timeString
     }
     
-    var hasFeatureType: Bool {
-        savedImage.featureType != nil
-    }
-    
     // MARK: - Initialization
     
     init(savedImage: SavedImage, onDelete: @escaping () -> Void) {

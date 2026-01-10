@@ -99,21 +99,6 @@ extension UIImage {
     }
 }
 
-// MARK: - UIDeviceOrientation Extensions
-
-extension UIDeviceOrientation {
-    /// Returns the video rotation angle for this device orientation
-    var videoRotationAngle: CGFloat {
-        switch self {
-        case .portrait: return 90
-        case .portraitUpsideDown: return 270
-        case .landscapeLeft: return 0
-        case .landscapeRight: return 180
-        default: return 90 // Default to portrait
-        }
-    }
-}
-
 // MARK: - AVCaptureDevice.DiscoverySession Extensions
 
 extension AVCaptureDevice.DiscoverySession {

@@ -193,10 +193,4 @@ class GalleryViewModel: ObservableObject {
         
         return deletedCount
     }
-    
-    // MARK: - Image Access
-    
-    func getImage(at id: UUID) -> SavedImage? {
-        return imageGroups.flatMap { $0.images }.first { $0.id == id }
-    }
 }
