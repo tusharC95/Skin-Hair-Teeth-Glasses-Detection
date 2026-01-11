@@ -145,16 +145,6 @@ jobs:
           path: ${{ runner.temp }}/build/SSMUtility.ipa
           retention-days: 3
 
-      # Upload to TestFlight
-      - name: Upload to TestFlight
-        id: testflight
-        uses: apple-actions/upload-testflight-build@v4
-        with:
-          app-path: ${{ runner.temp }}/build/SSMUtility.ipa
-          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
-
       # Notify Slack - Build Result
       - name: Notify Slack - Build Result
         uses: act10ns/slack@v2
@@ -165,5 +155,31 @@ jobs:
           message: |
             *Build ${{ job.status == 'success' && '✅ Succeeded' || '❌ Failed' }}*
             Branch: `${{ github.ref_name }}`
-            ${{ job.status == 'success' && 'Uploaded to TestFlight!' || '' }}
+            ${{ job.status == 'success' && 'IPA built and archived.' || '' }}
         if: always()
+
+  upload_testflight:
+    # Upload only on main branch pushes / manual dispatch, not PRs
+    if: ${{ github.event_name != 'pull_request' }}
+    needs: build_with_signing
+    runs-on: macos-15
+    steps:
+      - name: Download IPA artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app
+          path: ${{ runner.temp }}/build
+
+      - name: Verify iTMSTransporter is available
+        run: |
+          xcodebuild -version
+          xcrun -f iTMSTransporter
+
+      - name: Upload to TestFlight
+        id: testflight
+        uses: apple-actions/upload-testflight-build@v4
+        with:
+          app-path: ${{ runner.temp }}/build/SSMUtility.ipa
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
