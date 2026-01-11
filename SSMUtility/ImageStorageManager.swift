@@ -7,6 +7,9 @@
 
 import Foundation
 import UIKit
+import Sentry
+
+private let logger = SentrySDK.logger
 
 // MARK: - Storage Errors
 
@@ -99,7 +102,18 @@ class ImageStorageManager {
     }
     
     /// Last error that occurred during an operation
-    private(set) var lastError: ImageStorageError?
+    private(set) var lastError: ImageStorageError? {
+        didSet {
+            // Report errors to Sentry
+            if let error = lastError {
+                SentryErrorReporter.shared.reportError(
+                    error,
+                    context: "ImageStorageManager",
+                    extras: ["imagesDirectory": imagesDirectory.path]
+                )
+            }
+        }
+    }
     
     // MARK: - Save Images
     
@@ -143,6 +157,12 @@ class ImageStorageManager {
         var allImages = loadAllImageMetadata()
         allImages.append(savedImage)
         saveAllImageMetadata(allImages)
+        
+        logger.debug("Image saved", attributes: [
+            "filename": filename,
+            "featureType": featureType ?? "Original",
+            "fileSizeKB": Double(imageData.count) / 1024.0
+        ])
         
         return savedImage
     }
@@ -255,6 +275,12 @@ class ImageStorageManager {
         // Update metadata once for all deletions
         allImages.removeAll { idsToDelete.contains($0.id) }
         saveAllImageMetadata(allImages)
+        
+        logger.info("Batch delete completed", attributes: [
+            "requested": imagesToDelete.count,
+            "deleted": deletedCount,
+            "failed": failedCount
+        ])
         
         return (deleted: deletedCount, failed: failedCount)
     }

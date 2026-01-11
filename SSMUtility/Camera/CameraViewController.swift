@@ -9,6 +9,9 @@
 import UIKit
 import AVFoundation
 import SwiftUI
+import Sentry
+
+private let logger = SentrySDK.logger
 
 class CameraViewController: UIViewController {
     
@@ -249,21 +252,25 @@ class CameraViewController: UIViewController {
     // MARK: - Actions
     
     @objc private func captureButtonTapped() {
+        logger.info("Capture button tapped")
         viewModel.capturePhoto(previewLayer: previewView.videoPreviewLayer)
     }
     
     @objc private func switchCameraButtonTapped() {
+        logger.info("Switch camera button tapped")
         cameraButton.isEnabled = false
         photoButton.isEnabled = false
         
         viewModel.switchCamera { [weak self] success in
             guard let self = self else { return }
+            logger.debug("Camera switch completed", attributes: ["success": success])
             self.cameraButton.isEnabled = self.viewModel.canSwitchCamera && self.viewModel.isSessionRunning
             self.photoButton.isEnabled = self.viewModel.isCaptureEnabled
         }
     }
     
     @objc private func galleryButtonTapped() {
+        logger.info("Gallery opened")
         let galleryView = GalleryView()
         let hostingController = UIHostingController(rootView: galleryView)
         hostingController.modalPresentationStyle = .fullScreen

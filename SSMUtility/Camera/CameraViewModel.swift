@@ -8,6 +8,9 @@
 
 import AVFoundation
 import UIKit
+import Sentry
+
+private let logger = SentrySDK.logger
 
 // MARK: - Callbacks
 
@@ -117,12 +120,18 @@ class CameraViewModel {
     func selectAllFeatures() {
         Helper.sharedInstance.selectAllFeatures()
         selectedFeatures = Helper.sharedInstance.selectedFeatures
+        logger.info("All features selected")
         updateSegmentationTypes()
     }
     
     func toggleFeature(_ feature: FacialFeature) {
         Helper.sharedInstance.toggleFeature(feature)
         selectedFeatures = Helper.sharedInstance.selectedFeatures
+        let isSelected = selectedFeatures.contains(feature)
+        logger.debug("Feature toggled", attributes: [
+            "feature": feature.rawValue,
+            "isSelected": isSelected
+        ])
         updateSegmentationTypes()
     }
     

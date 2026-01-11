@@ -8,6 +8,9 @@
 import AVFoundation
 import UIKit
 import Accelerate
+import Sentry
+
+private let logger = SentrySDK.logger
 
 class PhotoCaptureProcessor: NSObject {
     private(set) var requestedPhotoSettings: AVCapturePhotoSettings
@@ -55,6 +58,10 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
     
     /// - Tag: WillBeginCapture
     func photoOutput(_ output: AVCapturePhotoOutput, willBeginCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings) {
+        logger.info("Photo capture starting", attributes: [
+            "uniqueID": resolvedSettings.uniqueID
+        ])
+        
         if resolvedSettings.livePhotoMovieDimensions.width > 0 && resolvedSettings.livePhotoMovieDimensions.height > 0 {
             livePhotoCaptureHandler(true)
         }
@@ -149,6 +156,10 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
         photoProcessingHandler(false)
         
         if let error = error {
+            SentryErrorReporter.shared.reportError(
+                error,
+                context: "PhotoCaptureProcessor.didFinishProcessingPhoto"
+            )
             photoSavedHandler(0, error)
             return
         } else {
@@ -170,6 +181,10 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
     /// - Tag: DidFinishCapture
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings, error: Error?) {
         if let error = error {
+            SentryErrorReporter.shared.reportError(
+                error,
+                context: "PhotoCaptureProcessor.didFinishCapture"
+            )
             photoSavedHandler(0, error)
             didFinish()
             return
@@ -177,6 +192,10 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
         
         guard let photoData = photoData else {
             let noDataError = NSError(domain: "Unmask Lab", code: -2, userInfo: [NSLocalizedDescriptionKey: "No photo data available"])
+            SentryErrorReporter.shared.reportError(
+                noDataError,
+                context: "PhotoCaptureProcessor.didFinishCapture"
+            )
             photoSavedHandler(0, noDataError)
             didFinish()
             return
@@ -209,12 +228,17 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
         
         // Call completion handler
         if savedCount > 0 {
+            logger.info("Photos saved successfully", attributes: [
+                "savedCount": savedCount,
+                "featuresProcessed": Helper.sharedInstance.selectedFeatures.count
+            ])
             self.photoSavedHandler(savedCount, nil)
         } else {
+            logger.error("Failed to save any photos")
             self.photoSavedHandler(0, NSError(domain: "Unmask Lab", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to save images"]))
-                    }
-                    
-                    self.didFinish()
+        }
+        
+        self.didFinish()
     }
     
     func sFunc_imageFixOrientation(img: UIImage) -> UIImage {

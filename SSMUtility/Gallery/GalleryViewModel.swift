@@ -7,6 +7,9 @@
 
 import Foundation
 import UIKit
+import Sentry
+
+private let logger = SentrySDK.logger
 
 // MARK: - GalleryViewModel
 
@@ -74,6 +77,10 @@ class GalleryViewModel: ObservableObject {
                 self?.imageGroups = groups
                 self?.isLoading = false
                 self?.cleanupInvalidSelections()
+                logger.info("Gallery loaded", attributes: [
+                    "groupCount": groups.count,
+                    "totalImages": self?.totalImageCount ?? 0
+                ])
             }
         }
     }
@@ -188,6 +195,8 @@ class GalleryViewModel: ObservableObject {
     // MARK: - Deletion
     
     func deleteSelectedImages() -> Int {
+        logger.info("Deleting selected images", attributes: ["count": selectedImages.count])
+        
         let allImages = imageGroups.flatMap { $0.images }
         let imagesToDelete = allImages.filter { selectedImages.contains($0.id) }
         
@@ -200,6 +209,10 @@ class GalleryViewModel: ObservableObject {
                 errorMessage = "Failed to delete \(result.failed) photo(s)"
             }
             showingError = true
+            logger.warn("Some images failed to delete", attributes: [
+                "deleted": result.deleted,
+                "failed": result.failed
+            ])
         }
         
         exitSelectionMode()

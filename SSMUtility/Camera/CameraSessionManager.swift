@@ -7,6 +7,9 @@
 
 import AVFoundation
 import UIKit
+import Sentry
+
+private let logger = SentrySDK.logger
 
 // MARK: - Protocols
 
@@ -105,6 +108,8 @@ class CameraSessionManager {
     private func performSessionConfiguration() {
         guard setupResult == .success else { return }
         
+        logger.info("Configuring camera session")
+        
         session.beginConfiguration()
         session.sessionPreset = .photo
         
@@ -113,6 +118,8 @@ class CameraSessionManager {
             guard let videoDevice = selectVideoDevice() else {
                 setupResult = .configurationFailed
                 session.commitConfiguration()
+                let error = CameraSessionError.deviceUnavailable
+                SentryErrorReporter.shared.reportError(error, context: "CameraSessionManager.performSessionConfiguration")
                 DispatchQueue.main.async {
                     self.delegate?.sessionManager(self, didFailWithError: .deviceUnavailable)
                 }
@@ -127,6 +134,8 @@ class CameraSessionManager {
             } else {
                 setupResult = .configurationFailed
                 session.commitConfiguration()
+                let error = CameraSessionError.configurationFailed
+                SentryErrorReporter.shared.reportError(error, context: "CameraSessionManager.canAddInput")
                 DispatchQueue.main.async {
                     self.delegate?.sessionManager(self, didFailWithError: .configurationFailed)
                 }
@@ -135,6 +144,7 @@ class CameraSessionManager {
         } catch {
             setupResult = .configurationFailed
             session.commitConfiguration()
+            SentryErrorReporter.shared.reportError(error, context: "CameraSessionManager.AVCaptureDeviceInput")
             DispatchQueue.main.async {
                 self.delegate?.sessionManager(self, didFailWithError: .configurationFailed)
             }
@@ -148,6 +158,9 @@ class CameraSessionManager {
         } else {
             setupResult = .configurationFailed
             session.commitConfiguration()
+            let error = CameraSessionError.configurationFailed
+            SentryErrorReporter.shared.reportError(error, context: "CameraSessionManager.canAddOutput")
+            logger.error("Failed to add photo output to session")
             DispatchQueue.main.async {
                 self.delegate?.sessionManager(self, didFailWithError: .configurationFailed)
             }
@@ -155,6 +168,10 @@ class CameraSessionManager {
         }
         
         session.commitConfiguration()
+        logger.info("Camera session configured successfully", attributes: [
+            "sessionPreset": "photo",
+            "depthDataSupported": photoOutput.isDepthDataDeliverySupported
+        ])
     }
     
     private func selectVideoDevice() -> AVCaptureDevice? {
@@ -191,6 +208,7 @@ class CameraSessionManager {
                 self.addObservers()
                 self.session.startRunning()
                 self.isSessionRunning = self.session.isRunning
+                logger.info("Camera session started")
                 
                 DispatchQueue.main.async {
                     self.delegate?.sessionManagerDidStartSession(self)

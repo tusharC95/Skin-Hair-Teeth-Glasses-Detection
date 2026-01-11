@@ -1,16 +1,31 @@
 PODS:
   - OpenCV (4.1.0)
+  - Sentry (9.1.0):
+    - Sentry/Core (= 9.1.0)
+  - Sentry/Core (9.1.0)
 
 DEPENDENCIES:
   - OpenCV (~> 4.1.0)
+  - Sentry (from `https://github.com/getsentry/sentry-cocoa.git`, tag `9.1.0`)
 
 SPEC REPOS:
   trunk:
     - OpenCV
 
+EXTERNAL SOURCES:
+  Sentry:
+    :git: https://github.com/getsentry/sentry-cocoa.git
+    :tag: 9.1.0
+
+CHECKOUT OPTIONS:
+  Sentry:
+    :git: https://github.com/getsentry/sentry-cocoa.git
+    :tag: 9.1.0
+
 SPEC CHECKSUMS:
   OpenCV: 52cd4d72ff29e2be83421477aec5447320b7fb19
+  Sentry: be734c121a4181156ca993a61cac33bb723f3834
 
-PODFILE CHECKSUM: 11a6c83f10d9f568c286bb5c595c7563e1bfa130
+PODFILE CHECKSUM: eff9bd56fe561f4d1978f93ed87316074cda7373
 
-COCOAPODS: 1.11.2
+COCOAPODS: 1.16.2

@@ -8,6 +8,9 @@
 import Foundation
 import UIKit
 import Photos
+import Sentry
+
+private let logger = SentrySDK.logger
 
 // MARK: - ImageDetailViewModel
 
@@ -72,8 +75,14 @@ class ImageDetailViewModel: ObservableObject {
     // MARK: - Actions
     
     func deleteImage() -> Bool {
+        logger.info("Deleting image", attributes: [
+            "filename": savedImage.filename,
+            "featureType": savedImage.featureType ?? "Original"
+        ])
+        
         let success = ImageStorageManager.shared.deleteImage(savedImage)
         if success {
+            logger.debug("Image deleted successfully")
             onDelete?()
         } else {
             if let error = ImageStorageManager.shared.lastError {
@@ -81,12 +90,15 @@ class ImageDetailViewModel: ObservableObject {
             } else {
                 errorMessage = "Failed to delete image"
             }
+            logger.error("Failed to delete image")
             showingError = true
         }
         return success
     }
     
     func exportToPhotos() {
+        logger.info("Exporting image to Photos")
+        
         PHPhotoLibrary.requestAuthorization(for: .addOnly) { [weak self] status in
             guard let self = self else { return }
             
@@ -99,18 +111,26 @@ class ImageDetailViewModel: ObservableObject {
                                 ? "Photo saved to your Photo Library."
                                 : "Could not save photo. Please check permissions."
                             self.showingExportAlert = true
+                            
+                            if success {
+                                logger.info("Image exported to Photos successfully")
+                            } else {
+                                logger.warn("Failed to export image to Photos")
+                            }
                         }
                     }
                 } else {
                     self.exportSuccess = false
                     self.exportMessage = "Could not save photo. Please check permissions."
                     self.showingExportAlert = true
+                    logger.warn("Photo library access denied")
                 }
             }
         }
     }
     
     func shareImage() {
+        logger.info("Sharing image")
         showingShareSheet = true
     }
     

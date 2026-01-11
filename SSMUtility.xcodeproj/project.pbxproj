@@ -25,9 +25,10 @@
 		CAM003000000000000000001 /* OrientationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAM003000000000000000002 /* OrientationManager.swift */; };
 		CAM004000000000000000001 /* FeatureSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAM004000000000000000002 /* FeatureSelectionView.swift */; };
 		CAM005000000000000000001 /* OrientationWarningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAM005000000000000000002 /* OrientationWarningView.swift */; };
+		EXT001000000000000000001 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EXT001000000000000000002 /* Extensions.swift */; };
 		GAL001000000000000000001 /* GalleryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = GAL001000000000000000002 /* GalleryViewModel.swift */; };
 		GAL002000000000000000001 /* ImageDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = GAL002000000000000000002 /* ImageDetailViewModel.swift */; };
-		EXT001000000000000000001 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EXT001000000000000000002 /* Extensions.swift */; };
+		SEN001000000000000000001 /* SentryErrorReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = SEN001000000000000000002 /* SentryErrorReporter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,16 +55,17 @@
 		A1B2C3D4E5F6A7B8C9D0E1F5 /* GalleryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F7 /* ImageDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDetailView.swift; sourceTree = "<group>"; };
 		BD309CE0C621B5F6EC0D554F /* Pods-SSMUtility.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SSMUtility.debug.xcconfig"; path = "Target Support Files/Pods-SSMUtility/Pods-SSMUtility.debug.xcconfig"; sourceTree = "<group>"; };
-		E10D7151FC042F59726E4357 /* Pods_SSMUtility.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SSMUtility.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F0C4F0D1EB1CA10B872184C8 /* Pods-SSMUtility-SSMUtilityUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SSMUtility-SSMUtilityUITests.debug.xcconfig"; path = "Target Support Files/Pods-SSMUtility-SSMUtilityUITests/Pods-SSMUtility-SSMUtilityUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		CAM001000000000000000002 /* CameraSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSessionManager.swift; sourceTree = "<group>"; };
 		CAM002000000000000000002 /* CameraViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewModel.swift; sourceTree = "<group>"; };
 		CAM003000000000000000002 /* OrientationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationManager.swift; sourceTree = "<group>"; };
 		CAM004000000000000000002 /* FeatureSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureSelectionView.swift; sourceTree = "<group>"; };
 		CAM005000000000000000002 /* OrientationWarningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationWarningView.swift; sourceTree = "<group>"; };
+		E10D7151FC042F59726E4357 /* Pods_SSMUtility.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SSMUtility.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EXT001000000000000000002 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		F0C4F0D1EB1CA10B872184C8 /* Pods-SSMUtility-SSMUtilityUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SSMUtility-SSMUtilityUITests.debug.xcconfig"; path = "Target Support Files/Pods-SSMUtility-SSMUtilityUITests/Pods-SSMUtility-SSMUtilityUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		GAL001000000000000000002 /* GalleryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryViewModel.swift; sourceTree = "<group>"; };
 		GAL002000000000000000002 /* ImageDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDetailViewModel.swift; sourceTree = "<group>"; };
-		EXT001000000000000000002 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		SEN001000000000000000002 /* SentryErrorReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentryErrorReporter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -126,6 +128,7 @@
 				5B5144A9277790BB00C332C9 /* SceneDelegate.swift */,
 				5B5144E327779C5700C332C9 /* Helper.swift */,
 				EXT001000000000000000002 /* Extensions.swift */,
+				SEN001000000000000000002 /* SentryErrorReporter.swift */,
 				A1B2C3D4E5F6A7B8C9D0E1F3 /* ImageStorageManager.swift */,
 				5B5144DB277791DB00C332C9 /* PreviewView.swift */,
 				5B5144E12777920400C332C9 /* PhotoCaptureDelegate.swift */,
@@ -134,6 +137,19 @@
 				5B5144B5277790BC00C332C9 /* Info.plist */,
 			);
 			path = SSMUtility;
+			sourceTree = "<group>";
+		};
+		C84BAD0FA7E5E79822A8C92C /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				BD309CE0C621B5F6EC0D554F /* Pods-SSMUtility.debug.xcconfig */,
+				88F9604C9F3CE7D1187CDABE /* Pods-SSMUtility.release.xcconfig */,
+				F0C4F0D1EB1CA10B872184C8 /* Pods-SSMUtility-SSMUtilityUITests.debug.xcconfig */,
+				05C25CF4AA7E81BA908BB89A /* Pods-SSMUtility-SSMUtilityUITests.release.xcconfig */,
+				5054FEF05875428F7C7D7C71 /* Pods-SSMUtilityTests.debug.xcconfig */,
+				200E9B4BF84972C4267D76B1 /* Pods-SSMUtilityTests.release.xcconfig */,
+			);
+			path = Pods;
 			sourceTree = "<group>";
 		};
 		CAM000000000000000000001 /* Camera */ = {
@@ -168,19 +184,6 @@
 			path = Gallery;
 			sourceTree = "<group>";
 		};
-		C84BAD0FA7E5E79822A8C92C /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				BD309CE0C621B5F6EC0D554F /* Pods-SSMUtility.debug.xcconfig */,
-				88F9604C9F3CE7D1187CDABE /* Pods-SSMUtility.release.xcconfig */,
-				F0C4F0D1EB1CA10B872184C8 /* Pods-SSMUtility-SSMUtilityUITests.debug.xcconfig */,
-				05C25CF4AA7E81BA908BB89A /* Pods-SSMUtility-SSMUtilityUITests.release.xcconfig */,
-				5054FEF05875428F7C7D7C71 /* Pods-SSMUtilityTests.debug.xcconfig */,
-				200E9B4BF84972C4267D76B1 /* Pods-SSMUtilityTests.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -192,6 +195,8 @@
 				5B5144A0277790BB00C332C9 /* Sources */,
 				5B5144A1277790BB00C332C9 /* Frameworks */,
 				5B5144A2277790BB00C332C9 /* Resources */,
+				113100A3092F53C9C39459A3 /* [CP] Embed Pods Frameworks */,
+				5BFB37CF2F134175005056C5 /* Upload Debug Symbols to Sentry */,
 			);
 			buildRules = (
 			);
@@ -249,6 +254,45 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		113100A3092F53C9C39459A3 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SSMUtility/Pods-SSMUtility-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SSMUtility/Pods-SSMUtility-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SSMUtility/Pods-SSMUtility-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		5BFB37CF2F134175005056C5 /* Upload Debug Symbols to Sentry */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Upload Debug Symbols to Sentry";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if which sentry-cli >/dev/null; then\n    sentry-cli debug-files upload --include-sources \"$DWARF_DSYM_FOLDER_PATH\"\nelse\n    echo \"warning: sentry-cli not installed\"\nfi\n";
+		};
 		767F035BCF4548CAD3802501 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -296,6 +340,7 @@
 				GAL001000000000000000001 /* GalleryViewModel.swift in Sources */,
 				GAL002000000000000000001 /* ImageDetailViewModel.swift in Sources */,
 				EXT001000000000000000001 /* Extensions.swift in Sources */,
+				SEN001000000000000000001 /* SentryErrorReporter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
