@@ -32,9 +32,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		05C25CF4AA7E81BA908BB89A /* Pods-SSMUtility-SSMUtilityUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SSMUtility-SSMUtilityUITests.release.xcconfig"; path = "Target Support Files/Pods-SSMUtility-SSMUtilityUITests/Pods-SSMUtility-SSMUtilityUITests.release.xcconfig"; sourceTree = "<group>"; };
-		200E9B4BF84972C4267D76B1 /* Pods-SSMUtilityTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SSMUtilityTests.release.xcconfig"; path = "Target Support Files/Pods-SSMUtilityTests/Pods-SSMUtilityTests.release.xcconfig"; sourceTree = "<group>"; };
-		5054FEF05875428F7C7D7C71 /* Pods-SSMUtilityTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SSMUtilityTests.debug.xcconfig"; path = "Target Support Files/Pods-SSMUtilityTests/Pods-SSMUtilityTests.debug.xcconfig"; sourceTree = "<group>"; };
 		5B134ADD27784B4B008654AF /* OpenCVWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenCVWrapper.h; sourceTree = "<group>"; };
 		5B134ADF27784B54008654AF /* OpenCVWrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OpenCVWrapper.mm; sourceTree = "<group>"; };
 		5B134AF027785DE7008654AF /* SSMUtility-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SSMUtility-Bridging-Header.h"; sourceTree = SOURCE_ROOT; };
@@ -62,7 +59,6 @@
 		CAM005000000000000000002 /* OrientationWarningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationWarningView.swift; sourceTree = "<group>"; };
 		E10D7151FC042F59726E4357 /* Pods_SSMUtility.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SSMUtility.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EXT001000000000000000002 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
-		F0C4F0D1EB1CA10B872184C8 /* Pods-SSMUtility-SSMUtilityUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SSMUtility-SSMUtilityUITests.debug.xcconfig"; path = "Target Support Files/Pods-SSMUtility-SSMUtilityUITests/Pods-SSMUtility-SSMUtilityUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		GAL001000000000000000002 /* GalleryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryViewModel.swift; sourceTree = "<group>"; };
 		GAL002000000000000000002 /* ImageDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDetailViewModel.swift; sourceTree = "<group>"; };
 		SEN001000000000000000002 /* SentryErrorReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentryErrorReporter.swift; sourceTree = "<group>"; };
@@ -144,10 +140,6 @@
 			children = (
 				BD309CE0C621B5F6EC0D554F /* Pods-SSMUtility.debug.xcconfig */,
 				88F9604C9F3CE7D1187CDABE /* Pods-SSMUtility.release.xcconfig */,
-				F0C4F0D1EB1CA10B872184C8 /* Pods-SSMUtility-SSMUtilityUITests.debug.xcconfig */,
-				05C25CF4AA7E81BA908BB89A /* Pods-SSMUtility-SSMUtilityUITests.release.xcconfig */,
-				5054FEF05875428F7C7D7C71 /* Pods-SSMUtilityTests.debug.xcconfig */,
-				200E9B4BF84972C4267D76B1 /* Pods-SSMUtilityTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
