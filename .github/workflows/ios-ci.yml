@@ -64,14 +64,26 @@ jobs:
 
           # Extract UUID from provisioning profile and install with UUID filename
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          PP_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i $PP_PATH))
+          PROFILE_PLIST=$RUNNER_TEMP/profile.plist
+          security cms -D -i "$PP_PATH" > "$PROFILE_PLIST"
+          PP_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" "$PROFILE_PLIST")
+          PP_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" "$PROFILE_PLIST")
+          PP_TEAM_ID=$(/usr/libexec/PlistBuddy -c "Print :TeamIdentifier:0" "$PROFILE_PLIST")
+          PP_APP_ID=$(/usr/libexec/PlistBuddy -c "Print :Entitlements:application-identifier" "$PROFILE_PLIST")
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/$PP_UUID.mobileprovision
           
           # Output UUID for use in build step
           echo "PP_UUID=$PP_UUID" >> $GITHUB_OUTPUT
+          echo "PP_NAME=$PP_NAME" >> $GITHUB_OUTPUT
+          echo "PP_TEAM_ID=$PP_TEAM_ID" >> $GITHUB_OUTPUT
+          echo "PP_APP_ID=$PP_APP_ID" >> $GITHUB_OUTPUT
           
           # Debug: List installed profiles
-          echo "Installed provisioning profile: $PP_UUID"
+          echo "Installed provisioning profile:"
+          echo "  UUID: $PP_UUID"
+          echo "  Name: $PP_NAME"
+          echo "  Team: $PP_TEAM_ID"
+          echo "  AppID: $PP_APP_ID"
           ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
 
       - name: Install CocoaPods
@@ -80,20 +92,11 @@ jobs:
           gem install cocoapods
           pod install --repo-update
 
-      - name: Create API Key file
-        id: api-key
-        env:
-          APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
-        run: |
-          mkdir -p ~/private_keys
-          # Preserve exact key contents (including newlines)
-          printf "%s" "$APPSTORE_API_PRIVATE_KEY" > ~/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8
-
       - name: build archive
         id: build
         run: |
           # Archive WITHOUT signing (prevents Pods signing/profile issues).
-          # We will sign during the export step using ExportOptions.plist + App Store Connect API key.
+          # We will sign during the export step using ExportOptions.plist + the installed cert/profile.
           xcodebuild -workspace SSMUtility.xcworkspace \
           -scheme "SSMUtility" \
           -archivePath $RUNNER_TEMP/SSMUtility.xcarchive \
@@ -113,15 +116,15 @@ jobs:
         run: |
           EXPORT_OPTS_PATH=$RUNNER_TEMP/ExportOptions.plist
           echo -n "$EXPORT_OPTIONS_PLIST" | base64 --decode -o $EXPORT_OPTS_PATH
+
+          echo "ExportOptions.plist (decoded):"
+          plutil -p "$EXPORT_OPTS_PATH" || true
+          echo "Provisioning profile installed (from secret): ${{ steps.install-cert.outputs.PP_NAME }}"
           
           xcodebuild -exportArchive \
           -archivePath $RUNNER_TEMP/SSMUtility.xcarchive \
           -exportOptionsPlist $EXPORT_OPTS_PATH \
           -exportPath $RUNNER_TEMP/build \
-          -authenticationKeyPath ~/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8 \
-          -authenticationKeyID ${{ secrets.APPSTORE_API_KEY_ID }} \
-          -authenticationKeyIssuerID ${{ secrets.APPSTORE_ISSUER_ID }} \
-          -allowProvisioningUpdates \
           OTHER_CODE_SIGN_FLAGS="--keychain $RUNNER_TEMP/app-signing.keychain-db"
 
       - name: Upload application artifact
