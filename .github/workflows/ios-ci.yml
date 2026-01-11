@@ -95,6 +95,15 @@ jobs:
           gem install cocoapods
           pod install --repo-update
 
+      - name: Create App Store Connect API key file (for upload)
+        id: asc-key
+        env:
+          APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/private_keys
+          # Preserve exact key contents (including newlines)
+          printf "%s" "$APPSTORE_API_PRIVATE_KEY" > ~/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8
+
       - name: build archive
         id: build
         run: |
@@ -124,17 +133,19 @@ jobs:
           plutil -p "$EXPORT_OPTS_PATH" || true
           echo "Provisioning profile installed (from secret): ${{ steps.install-cert.outputs.PP_NAME }}"
 
-          # CI override: ensure we only EXPORT the IPA here (no App Store Connect account required).
-          # TestFlight upload is handled by the separate upload-testflight-build step.
-          /usr/libexec/PlistBuddy -c "Set :destination export" "$EXPORT_OPTS_PATH"
+          # CI override: upload via xcodebuild using App Store Connect API key (no Xcode "Accounts" required).
+          /usr/libexec/PlistBuddy -c "Set :destination upload" "$EXPORT_OPTS_PATH" || true
           /usr/libexec/PlistBuddy -c "Set :uploadSymbols false" "$EXPORT_OPTS_PATH" || true
           echo "ExportOptions.plist (after CI overrides):"
           plutil -p "$EXPORT_OPTS_PATH" || true
-          
+
           xcodebuild -exportArchive \
           -archivePath $RUNNER_TEMP/SSMUtility.xcarchive \
           -exportOptionsPlist $EXPORT_OPTS_PATH \
           -exportPath $RUNNER_TEMP/build \
+          -authenticationKeyPath ~/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8 \
+          -authenticationKeyID ${{ secrets.APPSTORE_API_KEY_ID }} \
+          -authenticationKeyIssuerID ${{ secrets.APPSTORE_ISSUER_ID }} \
           OTHER_CODE_SIGN_FLAGS="--keychain $RUNNER_TEMP/app-signing.keychain-db"
 
       - name: Upload application artifact
@@ -157,29 +168,3 @@ jobs:
             Branch: `${{ github.ref_name }}`
             ${{ job.status == 'success' && 'IPA built and archived.' || '' }}
         if: always()
-
-  upload_testflight:
-    # Upload only on main branch pushes / manual dispatch, not PRs
-    if: ${{ github.event_name != 'pull_request' }}
-    needs: build_with_signing
-    runs-on: macos-15
-    steps:
-      - name: Download IPA artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: app
-          path: ${{ runner.temp }}/build
-
-      - name: Verify iTMSTransporter is available
-        run: |
-          xcodebuild -version
-          xcrun -f iTMSTransporter
-
-      - name: Upload to TestFlight
-        id: testflight
-        uses: apple-actions/upload-testflight-build@v4
-        with:
-          app-path: ${{ runner.temp }}/build/SSMUtility.ipa
-          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
