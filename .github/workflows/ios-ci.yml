@@ -60,7 +60,10 @@ jobs:
           # import certificate to keychain
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          # Make sure codesign/xcodebuild can find the identity in this temp keychain
+          security default-keychain -s $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
+          security find-identity -v -p codesigning $KEYCHAIN_PATH || true
 
           # Extract UUID from provisioning profile and install with UUID filename
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
@@ -120,6 +123,13 @@ jobs:
           echo "ExportOptions.plist (decoded):"
           plutil -p "$EXPORT_OPTS_PATH" || true
           echo "Provisioning profile installed (from secret): ${{ steps.install-cert.outputs.PP_NAME }}"
+
+          # CI override: ensure we only EXPORT the IPA here (no App Store Connect account required).
+          # TestFlight upload is handled by the separate upload-testflight-build step.
+          /usr/libexec/PlistBuddy -c "Set :destination export" "$EXPORT_OPTS_PATH"
+          /usr/libexec/PlistBuddy -c "Set :uploadSymbols false" "$EXPORT_OPTS_PATH" || true
+          echo "ExportOptions.plist (after CI overrides):"
+          plutil -p "$EXPORT_OPTS_PATH" || true
           
           xcodebuild -exportArchive \
           -archivePath $RUNNER_TEMP/SSMUtility.xcarchive \
