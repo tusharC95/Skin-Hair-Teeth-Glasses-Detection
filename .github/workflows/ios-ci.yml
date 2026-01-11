@@ -86,11 +86,14 @@ jobs:
           APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
         run: |
           mkdir -p ~/private_keys
-          echo -n "$APPSTORE_API_PRIVATE_KEY" > ~/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8
+          # Preserve exact key contents (including newlines)
+          printf "%s" "$APPSTORE_API_PRIVATE_KEY" > ~/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8
 
       - name: build archive
         id: build
         run: |
+          # Archive WITHOUT signing (prevents Pods signing/profile issues).
+          # We will sign during the export step using ExportOptions.plist + App Store Connect API key.
           xcodebuild -workspace SSMUtility.xcworkspace \
           -scheme "SSMUtility" \
           -archivePath $RUNNER_TEMP/SSMUtility.xcarchive \
@@ -98,10 +101,9 @@ jobs:
           -configuration Release \
           -destination generic/platform=iOS \
           IPHONEOS_DEPLOYMENT_TARGET=26.0 \
-          -authenticationKeyPath ~/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8 \
-          -authenticationKeyID ${{ secrets.APPSTORE_API_KEY_ID }} \
-          -authenticationKeyIssuerID ${{ secrets.APPSTORE_ISSUER_ID }} \
-          -allowProvisioningUpdates \
+          CODE_SIGN_IDENTITY="-" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO \
           clean archive
 
       - name: export ipa
@@ -119,7 +121,8 @@ jobs:
           -authenticationKeyPath ~/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8 \
           -authenticationKeyID ${{ secrets.APPSTORE_API_KEY_ID }} \
           -authenticationKeyIssuerID ${{ secrets.APPSTORE_ISSUER_ID }} \
-          -allowProvisioningUpdates
+          -allowProvisioningUpdates \
+          OTHER_CODE_SIGN_FLAGS="--keychain $RUNNER_TEMP/app-signing.keychain-db"
 
       - name: Upload application artifact
         id: upload
@@ -132,7 +135,7 @@ jobs:
       # Upload to TestFlight
       - name: Upload to TestFlight
         id: testflight
-        uses: apple-actions/upload-testflight-build@v3
+        uses: apple-actions/upload-testflight-build@v4
         with:
           app-path: ${{ runner.temp }}/build/SSMUtility.ipa
           issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
