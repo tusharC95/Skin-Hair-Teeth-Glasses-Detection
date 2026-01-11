@@ -59,11 +59,20 @@ jobs:
 
           # import certificate to keychain
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
 
-          # apply provisioning profile
+          # Extract UUID from provisioning profile and install with UUID filename
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+          PP_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i $PP_PATH))
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/$PP_UUID.mobileprovision
+          
+          # Output UUID for use in build step
+          echo "PP_UUID=$PP_UUID" >> $GITHUB_OUTPUT
+          
+          # Debug: List installed profiles
+          echo "Installed provisioning profile: $PP_UUID"
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
 
       - name: Install CocoaPods
         id: cocoapods
@@ -83,7 +92,7 @@ jobs:
           IPHONEOS_DEPLOYMENT_TARGET=26.0 \
           CODE_SIGN_STYLE=Manual \
           CODE_SIGN_IDENTITY="Apple Distribution" \
-          PROVISIONING_PROFILE_SPECIFIER="${{ vars.PROVISIONING_PROFILE_NAME }}" \
+          PROVISIONING_PROFILE="${{ steps.install-cert.outputs.PP_UUID }}" \
           DEVELOPMENT_TEAM=${{ vars.APPLE_TEAM_ID }} \
           clean archive
 
