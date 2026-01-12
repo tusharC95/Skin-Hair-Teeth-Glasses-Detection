@@ -77,7 +77,7 @@ struct FeatureButton: View {
     
     /// Tint color based on selection state
     private var tintColor: Color {
-        isSelected ? Color.yellow.opacity(0.8) : Color.white.opacity(0.3)
+        isSelected ? Color.yellow.opacity(1.0) : Color.white.opacity(0.3)
     }
     
     var body: some View {

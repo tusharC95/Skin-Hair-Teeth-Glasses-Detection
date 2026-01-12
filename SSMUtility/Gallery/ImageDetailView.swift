@@ -17,6 +17,10 @@ struct ImageDetailView: View {
     @State private var scale: CGFloat = 1.0
     @State private var lastScale: CGFloat = 1.0
     
+    // Pan/drag state
+    @State private var offset: CGSize = .zero
+    @State private var lastOffset: CGSize = .zero
+    
     // MARK: - Initialization
     
     init(savedImage: SavedImage, onDelete: @escaping () -> Void) {
@@ -43,6 +47,15 @@ struct ImageDetailView: View {
             .toolbarBackground(.visible, for: .navigationBar)
         }
         .preferredColorScheme(.dark)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            VStack(spacing: 0) {
+                imageInfoBar
+                AdMobBannerView(adUnitID: AdMobManager.shared.bannerAdUnitID)
+                    .frame(height: 50)
+                    .padding(.vertical, 8)
+            }
+            .background(Color.black)
+        }
         .onAppear {
             viewModel.loadImage()
         }
@@ -135,21 +148,27 @@ struct ImageDetailView: View {
     }
     
     private func imageContentView(_ uiImage: UIImage) -> some View {
-        VStack(spacing: 0) {
+        GeometryReader { geo in
             zoomableImage(uiImage)
-            imageInfoBar
+                .frame(width: geo.size.width, height: geo.size.height, alignment: .center)
+                .clipped()
         }
     }
     
     private func zoomableImage(_ uiImage: UIImage) -> some View {
         Image(uiImage: uiImage)
             .resizable()
-            .aspectRatio(contentMode: .fit)
+            .aspectRatio(contentMode: .fill)
             .scaleEffect(scale)
-            .gesture(zoomGesture)
+            .offset(offset)
+            .gesture(combinedGesture)
             .onTapGesture(count: 2) {
                 handleDoubleTap()
             }
+    }
+    
+    private var combinedGesture: some Gesture {
+        SimultaneousGesture(zoomGesture, dragGesture)
     }
     
     private var zoomGesture: some Gesture {
@@ -163,11 +182,29 @@ struct ImageDetailView: View {
             }
     }
     
+    private var dragGesture: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                // Only allow dragging when zoomed in
+                guard scale > 1.0 else { return }
+                offset = CGSize(
+                    width: lastOffset.width + value.translation.width,
+                    height: lastOffset.height + value.translation.height
+                )
+            }
+            .onEnded { _ in
+                lastOffset = offset
+                constrainOffset()
+            }
+    }
+    
     private func handleDoubleTap() {
         withAnimation {
             if scale > 1.0 {
                 scale = 1.0
                 lastScale = 1.0
+                offset = .zero
+                lastOffset = .zero
             } else {
                 scale = 2.0
                 lastScale = 2.0
@@ -180,10 +217,22 @@ struct ImageDetailView: View {
             withAnimation {
                 scale = 1.0
                 lastScale = 1.0
+                offset = .zero
+                lastOffset = .zero
             }
         } else if scale > 5.0 {
             scale = 5.0
             lastScale = 5.0
+        }
+    }
+    
+    private func constrainOffset() {
+        // Reset offset if scale is back to normal
+        if scale <= 1.0 {
+            withAnimation {
+                offset = .zero
+                lastOffset = .zero
+            }
         }
     }
     

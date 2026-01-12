@@ -7,6 +7,7 @@
 
 import UIKit
 import Sentry
+import GoogleMobileAds
 
 private let logger = SentrySDK.logger
 
@@ -60,6 +61,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // Log app launch
         logger.info("App launched successfully")
+
+        // Initialize Google Mobile Ads (AdMob)
+        AdMobManager.shared.configure()
         
         return true
     }

@@ -69,6 +69,15 @@ extension UIImage {
         return resizedImage
     }
     
+    /// Resize image to target size (simple method for icons)
+    func resized(to size: CGSize) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(size, false, scale)
+        draw(in: CGRect(origin: .zero, size: size))
+        let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return resizedImage?.withRenderingMode(renderingMode)
+    }
+    
     /// Rotate image by radians
     func rotate(radians: Float) -> UIImage? {
         var newSize = CGRect(origin: CGPoint.zero, size: self.size)

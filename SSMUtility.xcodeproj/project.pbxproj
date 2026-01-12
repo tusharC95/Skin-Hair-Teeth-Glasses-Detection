@@ -20,6 +20,8 @@
 		A1B2C3D4E5F6A7B8C9D0E1F2 /* ImageStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F3 /* ImageStorageManager.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E1F4 /* GalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F5 /* GalleryView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E1F6 /* ImageDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F7 /* ImageDetailView.swift */; };
+		ADS001000000000000000001 /* AdMobManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADS001000000000000000002 /* AdMobManager.swift */; };
+		ADS002000000000000000001 /* BannerAdView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADS002000000000000000002 /* BannerAdView.swift */; };
 		CAM001000000000000000001 /* CameraSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAM001000000000000000002 /* CameraSessionManager.swift */; };
 		CAM002000000000000000001 /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAM002000000000000000002 /* CameraViewModel.swift */; };
 		CAM003000000000000000001 /* OrientationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAM003000000000000000002 /* OrientationManager.swift */; };
@@ -51,6 +53,8 @@
 		A1B2C3D4E5F6A7B8C9D0E1F3 /* ImageStorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageStorageManager.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F5 /* GalleryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F7 /* ImageDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDetailView.swift; sourceTree = "<group>"; };
+		ADS001000000000000000002 /* AdMobManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdMobManager.swift; sourceTree = "<group>"; };
+		ADS002000000000000000002 /* BannerAdView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerAdView.swift; sourceTree = "<group>"; };
 		BD309CE0C621B5F6EC0D554F /* Pods-SSMUtility.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SSMUtility.debug.xcconfig"; path = "Target Support Files/Pods-SSMUtility/Pods-SSMUtility.debug.xcconfig"; sourceTree = "<group>"; };
 		CAM001000000000000000002 /* CameraSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSessionManager.swift; sourceTree = "<group>"; };
 		CAM002000000000000000002 /* CameraViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewModel.swift; sourceTree = "<group>"; };
@@ -117,6 +121,7 @@
 		5B5144A6277790BB00C332C9 /* SSMUtility */ = {
 			isa = PBXGroup;
 			children = (
+				ADS000000000000000000001 /* Ads */,
 				CAM000000000000000000001 /* Camera */,
 				GAL000000000000000000001 /* Gallery */,
 				5B134ADC27784B34008654AF /* OpenCVWrapper */,
@@ -133,6 +138,15 @@
 				5B5144B5277790BC00C332C9 /* Info.plist */,
 			);
 			path = SSMUtility;
+			sourceTree = "<group>";
+		};
+		ADS000000000000000000001 /* Ads */ = {
+			isa = PBXGroup;
+			children = (
+				ADS001000000000000000002 /* AdMobManager.swift */,
+				ADS002000000000000000002 /* BannerAdView.swift */,
+			);
+			path = Ads;
 			sourceTree = "<group>";
 		};
 		C84BAD0FA7E5E79822A8C92C /* Pods */ = {
@@ -189,6 +203,7 @@
 				5B5144A2277790BB00C332C9 /* Resources */,
 				113100A3092F53C9C39459A3 /* [CP] Embed Pods Frameworks */,
 				5BFB37CF2F134175005056C5 /* Upload Debug Symbols to Sentry */,
+				54AB5DA99B13103E611129D0 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -254,17 +269,30 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SSMUtility/Pods-SSMUtility-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SSMUtility/Pods-SSMUtility-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
-			outputPaths = (
-			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SSMUtility/Pods-SSMUtility-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		54AB5DA99B13103E611129D0 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SSMUtility/Pods-SSMUtility-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SSMUtility/Pods-SSMUtility-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SSMUtility/Pods-SSMUtility-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		5BFB37CF2F134175005056C5 /* Upload Debug Symbols to Sentry */ = {
@@ -333,6 +361,8 @@
 				GAL002000000000000000001 /* ImageDetailViewModel.swift in Sources */,
 				EXT001000000000000000001 /* Extensions.swift in Sources */,
 				SEN001000000000000000001 /* SentryErrorReporter.swift in Sources */,
+				ADS001000000000000000001 /* AdMobManager.swift in Sources */,
+				ADS002000000000000000001 /* BannerAdView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

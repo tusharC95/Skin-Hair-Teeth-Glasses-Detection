@@ -1,15 +1,21 @@
 PODS:
+  - Google-Mobile-Ads-SDK (12.14.0):
+    - GoogleUserMessagingPlatform (>= 1.1)
+  - GoogleUserMessagingPlatform (3.1.0)
   - OpenCV (4.1.0)
   - Sentry (9.1.0):
     - Sentry/Core (= 9.1.0)
   - Sentry/Core (9.1.0)
 
 DEPENDENCIES:
+  - Google-Mobile-Ads-SDK
   - OpenCV (~> 4.1.0)
   - Sentry (from `https://github.com/getsentry/sentry-cocoa.git`, tag `9.1.0`)
 
 SPEC REPOS:
   trunk:
+    - Google-Mobile-Ads-SDK
+    - GoogleUserMessagingPlatform
     - OpenCV
 
 EXTERNAL SOURCES:
@@ -23,9 +29,11 @@ CHECKOUT OPTIONS:
     :tag: 9.1.0
 
 SPEC CHECKSUMS:
+  Google-Mobile-Ads-SDK: 4534fd2dfcd3f705c5485a6633c5188d03d4eed2
+  GoogleUserMessagingPlatform: befe603da6501006420c206222acd449bba45a9c
   OpenCV: 52cd4d72ff29e2be83421477aec5447320b7fb19
   Sentry: be734c121a4181156ca993a61cac33bb723f3834
 
-PODFILE CHECKSUM: eff9bd56fe561f4d1978f93ed87316074cda7373
+PODFILE CHECKSUM: 345d7f354743f2f0998d98f11d28f74786fc62c4
 
 COCOAPODS: 1.16.2

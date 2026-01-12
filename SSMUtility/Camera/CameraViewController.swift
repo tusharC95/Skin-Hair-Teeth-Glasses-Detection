@@ -10,6 +10,7 @@ import UIKit
 import AVFoundation
 import SwiftUI
 import Sentry
+import GoogleMobileAds
 
 private let logger = SentrySDK.logger
 
@@ -29,6 +30,7 @@ class CameraViewController: UIViewController {
     private var featureSelectionView: FeatureSelectionHostingView!
     private var orientationWarningView: OrientationWarningView?
     private var spinner: UIActivityIndicatorView!
+    private var bannerAdView: AdMobBannerContainerView!
     
     // MARK: - Computed Properties
     
@@ -55,6 +57,9 @@ class CameraViewController: UIViewController {
         viewModel.refreshGalleryCount()
         viewModel.startOrientationMonitoring()
         viewModel.startSession()
+        
+        // Load banner ad
+        bannerAdView.load(adUnitID: AdMobManager.shared.bannerAdUnitID, rootViewController: self)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -79,6 +84,7 @@ class CameraViewController: UIViewController {
         setupGalleryButton()
         setupFeatureSelectionView()
         setupSpinner()
+        setupBannerAd()
         setupConstraints()
     }
     
@@ -115,12 +121,21 @@ class CameraViewController: UIViewController {
     }
     
     private func setupCameraButton() {
-        cameraButton = UIButton(type: .custom)
+        cameraButton = UIButton(type: .system)
         cameraButton.translatesAutoresizingMaskIntoConstraints = false
-        cameraButton.setImage(UIImage(named: "FlipCamera"), for: .normal)
-        cameraButton.tintColor = .systemYellow
-        cameraButton.contentMode = .scaleAspectFill
-        cameraButton.layer.cornerRadius = 4
+        
+        var config = UIButton.Configuration.filled()
+        // Resize FlipCamera to match gallery icon size (28pt)
+        let iconSize = CGSize(width: 56, height: 56)
+        config.image = UIImage(named: "FlipCamera")?
+            .withRenderingMode(.alwaysTemplate)
+            .resized(to: iconSize)
+        config.cornerStyle = .capsule
+        config.baseBackgroundColor = UIColor.black.withAlphaComponent(0.6)
+        config.baseForegroundColor = .systemYellow
+        config.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12)
+        
+        cameraButton.configuration = config
         cameraButton.isEnabled = false
         cameraButton.addTarget(self, action: #selector(switchCameraButtonTapped), for: .touchUpInside)
         view.addSubview(cameraButton)
@@ -171,23 +186,40 @@ class CameraViewController: UIViewController {
         previewView.addSubview(spinner)
     }
     
+    private func setupBannerAd() {
+        bannerAdView = AdMobBannerContainerView()
+        bannerAdView.translatesAutoresizingMaskIntoConstraints = false
+        bannerAdView.backgroundColor = .black
+        view.addSubview(bannerAdView)
+    }
+    
     private func setupConstraints() {
-        NSLayoutConstraint.activate([
+        // Standard banner height is 50pt
+        let bannerHeight: CGFloat = 50
+        
+        let constraints: [NSLayoutConstraint] = [
             // Preview View
             previewView.topAnchor.constraint(equalTo: view.topAnchor),
-            previewView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            previewView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            // Full-screen preview (edge-to-edge, behind overlays)
+            previewView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            previewView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             previewView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
             // Camera Unavailable Label
             cameraUnavailableLabel.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             cameraUnavailableLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
-            // Photo Button
+            // Banner Ad View (at the bottom, above safe area)
+            bannerAdView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bannerAdView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bannerAdView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            bannerAdView.heightAnchor.constraint(equalToConstant: bannerHeight),
+            
+            // Photo Button (above the banner)
             photoButton.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
-            photoButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40),
-            photoButton.widthAnchor.constraint(equalToConstant: 60),
-            photoButton.heightAnchor.constraint(equalToConstant: 60),
+            photoButton.bottomAnchor.constraint(equalTo: bannerAdView.topAnchor, constant: -20),
+            photoButton.widthAnchor.constraint(equalToConstant: 90),
+            photoButton.heightAnchor.constraint(equalToConstant: 90),
             
             // Camera Button
             cameraButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -30),
@@ -206,7 +238,9 @@ class CameraViewController: UIViewController {
             featureSelectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             featureSelectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             featureSelectionView.heightAnchor.constraint(equalToConstant: 70)
-        ])
+        ]
+
+        NSLayoutConstraint.activate(constraints)
     }
     
     // MARK: - Bindings

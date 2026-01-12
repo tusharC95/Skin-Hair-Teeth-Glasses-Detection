@@ -35,7 +35,7 @@ struct GalleryView: View {
         GridItem(.flexible(), spacing: 4),
         GridItem(.flexible(), spacing: 4)
     ]
-    
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -49,12 +49,6 @@ struct GalleryView: View {
                     galleryContent
                 }
                 
-                if viewModel.isSelectionMode && viewModel.hasSelection {
-                    VStack {
-                        Spacer()
-                        selectionActionBar
-                    }
-                }
             }
             .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
@@ -63,6 +57,18 @@ struct GalleryView: View {
             .toolbarBackground(.visible, for: .navigationBar)
         }
         .preferredColorScheme(.dark)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            VStack(spacing: 0) {
+                if viewModel.isSelectionMode && viewModel.hasSelection {
+                    selectionActionBar
+                }
+
+                AdMobBannerView(adUnitID: AdMobManager.shared.bannerAdUnitID)
+                    .frame(height: 50)
+                    .padding(.vertical, 8)
+            }
+            .background(Color.black)
+        }
         .onAppear {
             viewModel.loadImages()
         }
@@ -185,7 +191,6 @@ struct GalleryView: View {
                 }
             }
             .padding(.horizontal, 4)
-            .padding(.bottom, viewModel.isSelectionMode && viewModel.hasSelection ? 80 : 0)
         }
         .coordinateSpace(name: "galleryScroll")
         .onPreferenceChange(ImageFramePreferenceKey.self) { frames in

@@ -29,4 +29,10 @@ class PreviewView: UIView {
     override class var layerClass: AnyClass {
         return AVCaptureVideoPreviewLayer.self
     }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // Fill the screen like the native Camera app.
+        videoPreviewLayer.videoGravity = .resizeAspectFill
+    }
 }
