@@ -186,9 +186,13 @@ class CameraViewModel {
             
             photoSettings.photoQualityPrioritization = .balanced
             
+            // Get current camera position for post-processing flip decision
+            let cameraPosition = self.sessionManager.videoDeviceInput.device.position
+            
             // Create capture processor
             let processor = PhotoCaptureProcessor(
                 with: photoSettings,
+                cameraPosition: cameraPosition,
                 willCapturePhotoAnimation: { [weak self] in
                     // Notify for flash animation
                     DispatchQueue.main.async {

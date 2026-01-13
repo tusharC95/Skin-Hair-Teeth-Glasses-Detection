@@ -27,23 +27,61 @@ class PhotoCaptureProcessor: NSObject {
     
     private let photoSavedHandler: (Int, Error?) -> Void
     
+    /// Camera position - used to determine if final images need flipping before save
+    private let cameraPosition: AVCaptureDevice.Position
+    
     private var photoData: Data?
     private var maxPhotoProcessingTime: CMTime?
     
     let wrapper = OpenCVWrapper()
     
+    /// Whether to flip final images before saving (true for back camera)
+    private var shouldFlipBeforeSave: Bool {
+        return cameraPosition == .back
+    }
+    
     init(with requestedPhotoSettings: AVCapturePhotoSettings,
+         cameraPosition: AVCaptureDevice.Position,
          willCapturePhotoAnimation: @escaping () -> Void,
          livePhotoCaptureHandler: @escaping (Bool) -> Void,
          completionHandler: @escaping (PhotoCaptureProcessor) -> Void,
          photoProcessingHandler: @escaping (Bool) -> Void,
          photoSavedHandler: @escaping (Int, Error?) -> Void) {
         self.requestedPhotoSettings = requestedPhotoSettings
+        self.cameraPosition = cameraPosition
         self.willCapturePhotoAnimation = willCapturePhotoAnimation
         self.livePhotoCaptureHandler = livePhotoCaptureHandler
         self.completionHandler = completionHandler
         self.photoProcessingHandler = photoProcessingHandler
         self.photoSavedHandler = photoSavedHandler
+    }
+    
+    /// Flip image horizontally (actual pixel transformation for saving)
+    private func flipHorizontally(_ image: UIImage) -> UIImage {
+        guard let cgImage = image.cgImage else { return image }
+        
+        let width = image.size.width
+        let height = image.size.height
+        
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), false, image.scale)
+        guard let context = UIGraphicsGetCurrentContext() else {
+            UIGraphicsEndImageContext()
+            return image
+        }
+        
+        // Flip horizontally
+        context.translateBy(x: width, y: 0)
+        context.scaleBy(x: -1.0, y: 1.0)
+        
+        // Draw (flip Y for UIKit coordinate system)
+        context.translateBy(x: 0, y: height)
+        context.scaleBy(x: 1.0, y: -1.0)
+        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+        
+        let flippedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return flippedImage ?? image
     }
     
     private func didFinish() {
@@ -208,16 +246,23 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
         
         // Save original photo
         if let validInputImage = Helper.sharedInstance.selectedImage {
-            if ImageStorageManager.shared.saveImage(validInputImage, featureType: nil, captureDate: captureDate) != nil {
+            // Flip for back camera before saving (to correct the mirroring applied during processing)
+            let finalInputImage = shouldFlipBeforeSave ? flipHorizontally(validInputImage) : validInputImage
+            
+            if ImageStorageManager.shared.saveImage(finalInputImage, featureType: nil, captureDate: captureDate) != nil {
                 savedCount += 1
             }
             
             // Process and save feature images using the dictionary (correct feature mapping)
             for (featureType, smmImage) in Helper.sharedInstance.segmentationImages {
                 if let validImage = smmImage.resizeImageUsingVImage(size: CGSize(width: validInputImage.size.width, height: validInputImage.size.height)) {
-                    // Extract the feature and save with correct label
+                    // Extract the feature using OpenCV
                     let maskImage = wrapper.getRegionOfInterestFace(validImage, validInputImage)
-                    if ImageStorageManager.shared.saveImage(maskImage, featureType: featureType, captureDate: captureDate) != nil {
+                    
+                    // Flip for back camera before saving
+                    let finalMaskImage = shouldFlipBeforeSave ? flipHorizontally(maskImage) : maskImage
+                    
+                    if ImageStorageManager.shared.saveImage(finalMaskImage, featureType: featureType, captureDate: captureDate) != nil {
                         savedCount += 1
                     }
                 }

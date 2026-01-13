@@ -39,12 +39,17 @@ class GalleryViewModel: ObservableObject {
     
     // MARK: - Computed Properties
     
+    /// Flat array of all images for pager navigation
+    var allImages: [SavedImage] {
+        imageGroups.flatMap { $0.images }
+    }
+    
     var totalImageCount: Int {
-        imageGroups.flatMap { $0.images }.count
+        allImages.count
     }
     
     var allImageIds: Set<UUID> {
-        Set(imageGroups.flatMap { $0.images }.map { $0.id })
+        Set(allImages.map { $0.id })
     }
     
     var hasImages: Bool {

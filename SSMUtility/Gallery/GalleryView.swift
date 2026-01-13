@@ -26,7 +26,7 @@ struct GalleryView: View {
     @StateObject private var viewModel = GalleryViewModel()
     
     // Detail view state
-    @State private var selectedImage: SavedImage?
+    @State private var selectedImageIndex: Int = 0
     @State private var showingImageDetail = false
     @State private var showingDeleteConfirmation = false
     
@@ -77,12 +77,14 @@ struct GalleryView: View {
                 viewModel.loadImages()
             }
         }
-        .sheet(isPresented: $showingImageDetail) {
-            if let image = selectedImage {
-                ImageDetailView(savedImage: image) {
+        .fullScreenCover(isPresented: $showingImageDetail) {
+            ImagePagerView(
+                allImages: viewModel.allImages,
+                currentIndex: selectedImageIndex,
+                onDelete: {
                     viewModel.loadImages()
                 }
-            }
+            )
         }
         .alert("Delete \(viewModel.selectedCount) Photos?", isPresented: $showingDeleteConfirmation) {
             Button("Delete", role: .destructive) {
@@ -308,8 +310,11 @@ struct GalleryView: View {
                 viewModel.toggleSelection(for: image)
             }
         } else {
-            selectedImage = image
-            showingImageDetail = true
+            // Find the index of the tapped image in allImages
+            if let index = viewModel.allImages.firstIndex(where: { $0.id == image.id }) {
+                selectedImageIndex = index
+                showingImageDetail = true
+            }
         }
     }
     

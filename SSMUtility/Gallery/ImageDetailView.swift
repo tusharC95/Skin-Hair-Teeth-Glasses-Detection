@@ -2,12 +2,48 @@
  ImageDetailView.swift
  SSMUtility
 
- SwiftUI view for viewing a single image with export/delete options.
+ SwiftUI view for viewing images with swipe navigation and export/delete options.
  UI layer - delegates business logic to ImageDetailViewModel.
 */
 
 import SwiftUI
 import Photos
+
+// MARK: - Image Pager View (Swipe Navigation)
+
+struct ImagePagerView: View {
+    let allImages: [SavedImage]
+    @State var currentIndex: Int
+    let onDelete: () -> Void
+    
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        TabView(selection: $currentIndex) {
+            ForEach(Array(allImages.enumerated()), id: \.element.id) { index, image in
+                ImageDetailContent(
+                    savedImage: image,
+                    allImages: allImages,
+                    currentIndex: $currentIndex,
+                    onDelete: {
+                        onDelete()
+                        // If deleted the last image or only image, dismiss
+                        if allImages.count <= 1 {
+                            dismiss()
+                        }
+                    },
+                    onDismiss: { dismiss() }
+                )
+                .tag(index)
+            }
+        }
+        .tabViewStyle(.page(indexDisplayMode: .never))
+        .background(Color.black)
+        .ignoresSafeArea()
+    }
+}
+
+// MARK: - Single Image Detail View (Legacy support)
 
 struct ImageDetailView: View {
     @StateObject private var viewModel: ImageDetailViewModel
@@ -150,9 +186,9 @@ struct ImageDetailView: View {
     private func imageContentView(_ uiImage: UIImage) -> some View {
         GeometryReader { geo in
             zoomableImage(uiImage)
-                .frame(width: geo.size.width, height: geo.size.height, alignment: .center)
-                .clipped()
+                .position(x: geo.size.width / 2, y: geo.size.height / 2)
         }
+        .clipped()
     }
     
     private func zoomableImage(_ uiImage: UIImage) -> some View {
@@ -335,6 +371,304 @@ struct ShareSheet: UIViewControllerRepresentable {
     }
     
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
+// MARK: - Image Detail Content (Used in Pager)
+
+struct ImageDetailContent: View {
+    @StateObject private var viewModel: ImageDetailViewModel
+    let allImages: [SavedImage]
+    @Binding var currentIndex: Int
+    let onDelete: () -> Void
+    let onDismiss: () -> Void
+    
+    // Zoom state
+    @State private var scale: CGFloat = 1.0
+    @State private var lastScale: CGFloat = 1.0
+    
+    // Pan/drag state
+    @State private var offset: CGSize = .zero
+    @State private var lastOffset: CGSize = .zero
+    
+    init(savedImage: SavedImage, allImages: [SavedImage], currentIndex: Binding<Int>, onDelete: @escaping () -> Void, onDismiss: @escaping () -> Void) {
+        _viewModel = StateObject(wrappedValue: ImageDetailViewModel(savedImage: savedImage, onDelete: onDelete))
+        self.allImages = allImages
+        _currentIndex = currentIndex
+        self.onDelete = onDelete
+        self.onDismiss = onDismiss
+    }
+    
+    var body: some View {
+        NavigationView {
+            ZStack {
+                Color.black.ignoresSafeArea()
+                
+                if viewModel.isLoading {
+                    loadingView
+                } else if let image = viewModel.image {
+                    imageContentView(image)
+                } else {
+                    errorView
+                }
+            }
+            .navigationTitle(navigationTitle)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { toolbarContent }
+            .toolbarBackground(Color.black, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+        }
+        .preferredColorScheme(.dark)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            VStack(spacing: 0) {
+                imageInfoBar
+                AdMobBannerView(adUnitID: AdMobManager.shared.bannerAdUnitID)
+                    .frame(height: 50)
+                    .padding(.vertical, 8)
+            }
+            .background(Color.black)
+        }
+        .onAppear {
+            viewModel.loadImage()
+            resetZoom()
+        }
+        .onChange(of: currentIndex) { _, _ in
+            resetZoom()
+        }
+        .confirmationDialog("Delete Photo?", isPresented: $viewModel.showingDeleteConfirmation, titleVisibility: .visible) {
+            Button("Delete", role: .destructive) {
+                if viewModel.deleteImage() {
+                    onDelete()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This photo will be permanently deleted from the app.")
+        }
+        .alert("Error", isPresented: $viewModel.showingError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(viewModel.errorMessage)
+        }
+        .alert(viewModel.exportSuccess ? "Saved!" : "Error", isPresented: $viewModel.showingExportAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(viewModel.exportMessage)
+        }
+        .sheet(isPresented: $viewModel.showingShareSheet) {
+            if let image = viewModel.image {
+                ShareSheet(items: [image])
+            }
+        }
+    }
+    
+    // MARK: - Navigation Title with Counter
+    
+    private var navigationTitle: String {
+        let baseTitle = viewModel.savedImage.featureType ?? "Original Photo"
+        return "\(baseTitle) (\(currentIndex + 1)/\(allImages.count))"
+    }
+    
+    // MARK: - Toolbar
+    
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .navigationBarLeading) {
+            Button("Close") {
+                onDismiss()
+            }
+            .foregroundColor(.yellow)
+        }
+        
+        ToolbarItem(placement: .navigationBarTrailing) {
+            actionMenu
+        }
+    }
+    
+    private var actionMenu: some View {
+        Menu {
+            Button {
+                viewModel.shareImage()
+            } label: {
+                Label("Share", systemImage: "square.and.arrow.up")
+            }
+            
+            Button {
+                viewModel.exportToPhotos()
+            } label: {
+                Label("Save to Photos", systemImage: "photo.on.rectangle")
+            }
+            
+            Divider()
+            
+            Button(role: .destructive) {
+                viewModel.confirmDelete()
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        } label: {
+            Image(systemName: "ellipsis.circle")
+                .foregroundColor(.yellow)
+        }
+    }
+    
+    // MARK: - Views
+    
+    private var loadingView: some View {
+        ProgressView()
+            .tint(.yellow)
+            .scaleEffect(1.5)
+    }
+    
+    private var errorView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "exclamationmark.triangle")
+                .font(.system(size: 50))
+                .foregroundColor(.gray)
+            Text("Unable to load image")
+                .foregroundColor(.gray)
+        }
+    }
+    
+    private func imageContentView(_ uiImage: UIImage) -> some View {
+        GeometryReader { geo in
+            zoomableImage(uiImage)
+                .position(x: geo.size.width / 2, y: geo.size.height / 2)
+        }
+        .clipped()
+    }
+    
+    private func zoomableImage(_ uiImage: UIImage) -> some View {
+        Image(uiImage: uiImage)
+            .resizable()
+            .aspectRatio(contentMode: .fill)
+            .scaleEffect(scale)
+            .offset(offset)
+            .gesture(scale > 1.0 ? dragGesture : nil)
+            .gesture(zoomGesture)
+            .onTapGesture(count: 2) {
+                handleDoubleTap()
+            }
+    }
+    
+    private var zoomGesture: some Gesture {
+        MagnificationGesture()
+            .onChanged { value in
+                scale = lastScale * value
+            }
+            .onEnded { _ in
+                lastScale = scale
+                constrainZoom()
+            }
+    }
+    
+    private var dragGesture: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                guard scale > 1.0 else { return }
+                offset = CGSize(
+                    width: lastOffset.width + value.translation.width,
+                    height: lastOffset.height + value.translation.height
+                )
+            }
+            .onEnded { _ in
+                lastOffset = offset
+                constrainOffset()
+            }
+    }
+    
+    private func handleDoubleTap() {
+        withAnimation {
+            if scale > 1.0 {
+                resetZoom()
+            } else {
+                scale = 2.0
+                lastScale = 2.0
+            }
+        }
+    }
+    
+    private func resetZoom() {
+        scale = 1.0
+        lastScale = 1.0
+        offset = .zero
+        lastOffset = .zero
+    }
+    
+    private func constrainZoom() {
+        if scale < 1.0 {
+            withAnimation {
+                resetZoom()
+            }
+        } else if scale > 5.0 {
+            scale = 5.0
+            lastScale = 5.0
+        }
+    }
+    
+    private func constrainOffset() {
+        if scale <= 1.0 {
+            withAnimation {
+                offset = .zero
+                lastOffset = .zero
+            }
+        }
+    }
+    
+    private var imageInfoBar: some View {
+        VStack(spacing: 8) {
+            Divider()
+                .background(Color.gray)
+            
+            HStack {
+                imageMetadata
+                Spacer()
+                featureBadge
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 8)
+        }
+        .background(Color.black)
+    }
+    
+    private var imageMetadata: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Image(systemName: "calendar")
+                    .foregroundColor(.gray)
+                Text(viewModel.dateString)
+                    .foregroundColor(.white)
+            }
+            .font(.subheadline)
+            
+            HStack {
+                Image(systemName: "clock")
+                    .foregroundColor(.gray)
+                Text(viewModel.timeString)
+                    .foregroundColor(.white)
+            }
+            .font(.subheadline)
+        }
+    }
+    
+    @ViewBuilder
+    private var featureBadge: some View {
+        if let featureType = viewModel.featureType {
+            FeatureBadgeView(
+                type: featureType,
+                icon: viewModel.featureIcon(for: featureType),
+                colorType: viewModel.featureColorName(for: featureType)
+            )
+        } else {
+            Text("Original")
+                .font(.caption)
+                .fontWeight(.medium)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.gray.opacity(0.3))
+                .foregroundColor(.white)
+                .cornerRadius(8)
+        }
+    }
 }
 
 // MARK: - Preview
