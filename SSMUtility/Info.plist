@@ -6,8 +6,6 @@
 	<string>ca-app-pub-7265847823691604~1378790490</string>
 	<key>ADMOB_BANNER_AD_UNIT_ID</key>
 	<string>ca-app-pub-7265847823691604/7894235569</string>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>This identifier will be used to deliver personalized ads and measure ad performance.</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>
