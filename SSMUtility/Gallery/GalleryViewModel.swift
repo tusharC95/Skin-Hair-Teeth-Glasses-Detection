@@ -225,4 +225,26 @@ class GalleryViewModel: ObservableObject {
         
         return result.deleted
     }
+    
+    // MARK: - Sharing
+    
+    /// Loads UIImages for all selected images (for sharing)
+    func loadSelectedImages(completion: @escaping ([UIImage]) -> Void) {
+        let allImages = imageGroups.flatMap { $0.images }
+        let imagesToShare = allImages.filter { selectedImages.contains($0.id) }
+        
+        logger.info("Loading images for sharing", attributes: ["count": imagesToShare.count])
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            var loadedImages: [UIImage] = []
+            for savedImage in imagesToShare {
+                if let image = ImageStorageManager.shared.loadImage(for: savedImage) {
+                    loadedImages.append(image)
+                }
+            }
+            DispatchQueue.main.async {
+                completion(loadedImages)
+            }
+        }
+    }
 }

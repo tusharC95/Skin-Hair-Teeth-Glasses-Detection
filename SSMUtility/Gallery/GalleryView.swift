@@ -30,6 +30,11 @@ struct GalleryView: View {
     @State private var showingImageDetail = false
     @State private var showingDeleteConfirmation = false
     
+    // Share state
+    @State private var showingShareSheet = false
+    @State private var imagesToShare: [UIImage] = []
+    @State private var isLoadingShare = false
+    
     private let columns = [
         GridItem(.flexible(), spacing: 4),
         GridItem(.flexible(), spacing: 4),
@@ -98,6 +103,11 @@ struct GalleryView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(viewModel.errorMessage ?? "An error occurred")
+        }
+        .sheet(isPresented: $showingShareSheet) {
+            if !imagesToShare.isEmpty {
+                ShareSheet(items: imagesToShare)
+            }
         }
     }
     
@@ -270,36 +280,60 @@ struct GalleryView: View {
     }
     
     private var selectionActionBar: some View {
-        HStack(spacing: 20) {
-            Spacer()
-            
-            Button(action: {
-                showingDeleteConfirmation = true
-            }) {
-                HStack {
-                    Image(systemName: "trash")
-                    Text("Delete (\(viewModel.selectedCount))")
+        // GlassEffectContainer groups elements so they blend together like liquid
+        GlassEffectContainer {
+            HStack(spacing: 16) {
+                // Share button with liquid glass effect
+                Button(action: {
+                    shareSelectedImages()
+                }) {
+                    HStack {
+                        if isLoadingShare {
+                            ProgressView()
+                                .tint(.primary)
+                        } else {
+                            Image(systemName: "square.and.arrow.up")
+                        }
+                        Text("Share (\(viewModel.selectedCount))")
+                    }
+                    .font(.headline)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 14)
+                    .foregroundColor(.white)
                 }
-                .font(.headline)
-                .foregroundColor(.white)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 14)
-                .background(Color.red)
-                .cornerRadius(25)
+                // Tint with opacity for see-through glass, interactive for touch feedback
+                .glassEffect(.regular.tint(.yellow.opacity(1)).interactive())
+                .disabled(isLoadingShare)
+                
+                // Delete button with liquid glass effect
+                Button(action: {
+                    showingDeleteConfirmation = true
+                }) {
+                    HStack {
+                        Image(systemName: "trash")
+                        Text("Delete (\(viewModel.selectedCount))")
+                    }
+                    .font(.headline)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 14)
+                    .foregroundColor(.white)
+                }
+                // Red tint for destructive action, interactive for touch feedback
+                .glassEffect(.regular.tint(.red.opacity(1)).interactive())
             }
-            
-            Spacer()
         }
         .padding(.bottom, 20)
-        .background(
-            LinearGradient(
-                colors: [Color.black.opacity(0), Color.black.opacity(0.9)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .frame(height: 100)
-            .allowsHitTesting(false)
-        )
+    }
+    
+    private func shareSelectedImages() {
+        isLoadingShare = true
+        viewModel.loadSelectedImages { images in
+            isLoadingShare = false
+            if !images.isEmpty {
+                imagesToShare = images
+                showingShareSheet = true
+            }
+        }
     }
     
     // MARK: - Actions
